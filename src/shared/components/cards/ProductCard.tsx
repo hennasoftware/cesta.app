@@ -36,14 +36,14 @@ export function ProductCard({ product }: ProductCardProps) {
       </Link>
       <div className="p-5">
         <div className="flex items-start justify-between gap-3">
-          <Link to={`/produto/${product.slug}`} className="text-lg font-extrabold text-coffee transition hover:text-caramel dark:text-cream">
+          <Link to={`/produto/${product.slug}`} className="text-lg font-extrabold text-coffee transition hover:text-caramel dark:text-gold">
             {product.name}
           </Link>
           <span className="flex shrink-0 items-center gap-1 rounded-full bg-gold/18 px-2.5 py-1 text-xs font-bold text-coffee dark:bg-gold/20 dark:text-gold">
             <Star size={13} fill="currentColor" /> {product.rating.toFixed(1)}
           </span>
         </div>
-        <p className="mt-3 min-h-12 text-sm leading-6 text-coffee/72 dark:text-cream/78">{product.description}</p>
+        <p className="mt-3 min-h-12 text-sm leading-6 text-coffee/72 dark:text-linen/90">{product.description}</p>
         <div className="mt-4 flex flex-wrap gap-2">
           <span className="inline-flex items-center gap-1 rounded-full bg-pistachio px-2.5 py-1 text-[11px] font-bold text-coffee dark:bg-pistachio dark:text-espresso">
             <Truck size={12} /> Entrega local
@@ -57,14 +57,14 @@ export function ProductCard({ product }: ProductCardProps) {
         </div>
         <div className="mt-5 flex items-center justify-between gap-3">
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-caramel">A partir de</p>
-            <p className="text-2xl font-extrabold text-coffee dark:text-cream">{formatCurrency(product.price)}</p>
+            <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-caramel dark:text-gold">A partir de</p>
+            <p className="text-2xl font-extrabold text-coffee dark:text-linen">{formatCurrency(product.price)}</p>
           </div>
           <WhatsAppButton message={productOrderMessage(product.name)} size="sm" />
         </div>
         <Link
           to={`/produto/${product.slug}`}
-          className="mt-4 inline-flex items-center gap-2 text-sm font-bold text-caramel transition hover:text-coffee dark:hover:text-gold"
+          className="mt-4 inline-flex items-center gap-2 text-sm font-bold text-caramel transition hover:text-coffee dark:text-gold dark:hover:text-linen"
         >
           Ver experiência <MessageCircle size={15} />
         </Link>

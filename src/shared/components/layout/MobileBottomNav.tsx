@@ -29,12 +29,12 @@ export function MobileBottomNav() {
   const itemClass = (isActive: boolean) =>
     `group flex h-[58px] flex-col items-center justify-center gap-1 rounded-[1.15rem] text-[11px] font-bold transition-all duration-300 ${
       isActive
-        ? 'bg-coffee text-cream shadow-[0_10px_24px_rgba(75,47,36,0.22)] dark:bg-gold dark:text-espresso dark:shadow-[0_10px_24px_rgba(215,168,82,0.18)]'
-        : 'text-coffee/68 hover:bg-coffee/7 hover:text-coffee dark:text-cream/68 dark:hover:bg-white/10 dark:hover:text-cream'
+        ? 'bg-coffee text-[#f6a21a] shadow-[0_10px_24px_rgba(75,47,36,0.22)] dark:bg-gold dark:text-espresso dark:shadow-[0_10px_24px_rgba(215,168,82,0.18)]'
+        : 'text-[#df741f] hover:bg-coffee/7 hover:text-[#f08a24] dark:text-cream/68 dark:hover:bg-white/10 dark:hover:text-cream'
     }`;
 
   return (
-    <nav className="fixed inset-x-3 bottom-3 z-50 rounded-[1.7rem] border border-coffee/10 bg-cream/92 p-2 shadow-premium ring-1 ring-white/70 backdrop-blur-3xl dark:border-white/12 dark:bg-[#2a1a13]/94 dark:ring-gold/10 md:hidden">
+    <nav className="fixed inset-x-3 bottom-3 z-50 rounded-[1.7rem] border border-coffee/12 bg-linen/96 p-2 shadow-premium ring-1 ring-coffee/10 backdrop-blur-3xl dark:border-white/12 dark:bg-[#2a1a13]/94 dark:ring-gold/10 md:hidden">
       <div className="grid grid-cols-4 gap-1">
         {navItems.map((item) => {
           const Icon = item.icon;

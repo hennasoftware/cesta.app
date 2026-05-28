@@ -107,8 +107,8 @@ export function HomePage() {
         <div className="grid gap-5 lg:grid-cols-[1.18fr_1fr]">
           <Link to={`/catalogo?categoria=${mainCategory.id}`} className="group relative min-h-[430px] overflow-hidden rounded-[2.25rem] shadow-premium">
             <img className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-105" src={mainCategory.image} alt={mainCategory.name} />
-            <div className="absolute inset-0 bg-gradient-to-t from-espresso/86 via-espresso/34 to-transparent" />
-            <div className="absolute bottom-0 p-8 text-white">
+            <div className="absolute inset-0 bg-gradient-to-t from-espresso/95 via-espresso/58 to-transparent" />
+            <div className="absolute bottom-0 p-8 text-white drop-shadow-[0_2px_12px_rgba(36,21,15,0.7)]">
               <Badge tone="gold">Categoria destaque</Badge>
               <h3 className="mt-5 font-display text-4xl font-extrabold">{mainCategory.name}</h3>
               <p className="mt-3 max-w-md text-base leading-7 text-white/88">{mainCategory.description}</p>
@@ -146,8 +146,8 @@ export function HomePage() {
                 <span className="grid h-12 w-12 place-items-center rounded-2xl bg-coffee text-cream dark:bg-gold dark:text-espresso">
                   <step.icon size={21} />
                 </span>
-                <h3 className="mt-5 text-lg font-extrabold text-coffee dark:text-cream">{step.title}</h3>
-                <p className="mt-3 text-sm leading-6 text-coffee/70 dark:text-cream/76">{step.text}</p>
+                <h3 className="mt-5 text-lg font-extrabold text-coffee dark:text-gold">{step.title}</h3>
+                <p className="mt-3 text-sm leading-6 text-coffee/70 dark:text-linen/90">{step.text}</p>
               </motion.div>
             ))}
           </div>
@@ -168,8 +168,8 @@ export function HomePage() {
           {benefits.map((benefit) => (
             <div key={benefit.title} className="rounded-[2rem] border border-white/70 bg-white p-6 shadow-premium dark:border-white/14 dark:bg-[#24150f]">
               <benefit.icon className="text-sage dark:text-pistachio" size={28} />
-              <h3 className="mt-5 text-lg font-extrabold text-coffee dark:text-cream">{benefit.title}</h3>
-              <p className="mt-3 text-sm leading-6 text-coffee/70 dark:text-cream/76">{benefit.text}</p>
+              <h3 className="mt-5 text-lg font-extrabold text-coffee dark:text-gold">{benefit.title}</h3>
+              <p className="mt-3 text-sm leading-6 text-coffee/70 dark:text-linen/90">{benefit.text}</p>
             </div>
           ))}
         </div>
