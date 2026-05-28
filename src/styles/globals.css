@@ -1,0 +1,56 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color: #2e1c15;
+  background: #fff8ed;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+  overflow-x: hidden;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+option {
+  color: #24150f;
+  background: #fff8ed;
+}
+
+::selection {
+  color: #24150f;
+  background: #f1cfc9;
+}
+
+.dark {
+  color: #fff8ed;
+  background: #170f0b;
+}
+
+.premium-scrollbar::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+}
+
+.premium-scrollbar::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgba(185, 128, 77, 0.42);
+}
