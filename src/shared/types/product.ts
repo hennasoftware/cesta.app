@@ -17,6 +17,10 @@ export type Product = {
   featured?: boolean;
   rating: number;
   images: string[];
+  photo?: string;
+  available?: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
   includedItems: string[];
 };
 

@@ -6,8 +6,10 @@ import { ProductCard } from '../../../shared/components/cards/ProductCard';
 import { WhatsAppButton } from '../../../shared/components/WhatsAppButton';
 import { Badge } from '../../../shared/components/ui/Badge';
 import { ButtonLink } from '../../../shared/components/ui/Button';
+import { Loading } from '../../../shared/components/ui/Loading';
 import { SectionTitle } from '../../../shared/components/ui/SectionTitle';
-import { products, testimonials } from '../../../shared/mocks/products';
+import { useProducts } from '../../../shared/hooks/useProducts';
+import { testimonials } from '../../../shared/mocks/products';
 import { formatCurrency, productOrderMessage } from '../../../shared/services/whatsapp';
 
 const experienceBlocks = [
@@ -35,6 +37,7 @@ const experienceBlocks = [
 
 export function ProductDetailsPage() {
   const { slug } = useParams();
+  const { products, loading } = useProducts({ fallbackToMocks: false });
   const product = products.find((item) => item.slug === slug);
   const [activeImage, setActiveImage] = useState(0);
 
@@ -42,6 +45,10 @@ export function ProductDetailsPage() {
     if (!product) return [];
     return products.filter((item) => item.category === product.category && item.id !== product.id).slice(0, 3);
   }, [product]);
+
+  if (loading) {
+    return <Loading label="Carregando produto..." />;
+  }
 
   if (!product) {
     return <Navigate to="/catalogo" replace />;
@@ -57,7 +64,7 @@ export function ProductDetailsPage() {
         <div>
           <div className="relative overflow-hidden rounded-[2.5rem] border border-white/70 bg-white p-3 shadow-premium dark:border-white/14 dark:bg-[#24150f]">
             <img src={product.images[activeImage]} alt={product.name} className="h-[360px] w-full rounded-[2rem] object-cover sm:h-[520px]" />
-            <div className="absolute left-8 top-8 rounded-full border border-white/35 bg-white/78 px-4 py-2 text-sm font-extrabold text-coffee shadow-sm backdrop-blur">
+            <div className="absolute left-8 top-8 rounded-full border border-white/80 bg-white px-4 py-2 text-sm font-extrabold text-espresso shadow-[0_12px_34px_rgba(36,21,15,0.32)]">
               Montagem artesanal
             </div>
           </div>
@@ -106,10 +113,17 @@ export function ProductDetailsPage() {
             </div>
           </div>
 
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <WhatsAppButton message={productOrderMessage(product.name)} size="lg" className="flex-1">
+          <div className="mt-8 rounded-[2rem] border border-[#25d366]/25 bg-[#25d366]/10 p-3 shadow-sm">
+            <WhatsAppButton
+              message={productOrderMessage(product.name)}
+              size="lg"
+              className="min-h-14 w-full bg-[#1f8f4d] text-base font-extrabold text-white shadow-[0_16px_36px_rgba(31,143,77,0.28)] hover:bg-[#187a40] dark:bg-[#25d366] dark:text-espresso dark:hover:bg-[#31df73]"
+            >
               Pedir agora no WhatsApp
             </WhatsAppButton>
+            <p className="mt-3 text-center text-xs font-bold text-coffee/70 dark:text-cream/75">
+              Atendimento humano para confirmar disponibilidade, personalização e entrega.
+            </p>
           </div>
         </div>
       </section>
@@ -130,9 +144,11 @@ export function ProductDetailsPage() {
       <section className="mt-16 rounded-[2.5rem] bg-espresso p-6 text-cream shadow-premium md:p-10">
         <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
           <div>
-            <Badge tone="gold">Personalização</Badge>
-            <h2 className="mt-5 font-display text-3xl font-extrabold md:text-4xl">Crie uma versão com a sua intenção.</h2>
-            <p className="mt-4 leading-8 text-cream/72">
+            <span className="inline-flex rounded-full bg-gold px-3 py-1 text-xs font-extrabold text-espresso shadow-sm ring-1 ring-white/20">
+              Personalização
+            </span>
+            <h2 className="mt-5 font-display text-3xl font-extrabold text-white md:text-4xl">Crie uma versão com a sua intenção.</h2>
+            <p className="mt-4 leading-8 text-cream/80">
               O atendimento pode adaptar itens, mensagem, cores, flores e acabamento para combinar com a pessoa presenteada.
             </p>
           </div>

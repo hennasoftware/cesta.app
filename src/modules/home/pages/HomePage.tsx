@@ -1,12 +1,12 @@
 import { motion } from 'framer-motion';
 import { ArrowRight, Gift, HeartHandshake, PackageCheck, ShieldCheck, Sparkles, Timer, Truck, Wand2 } from 'lucide-react';
-import { Link } from 'react-router-dom';
 import { ProductCard } from '../../../shared/components/cards/ProductCard';
 import { Badge } from '../../../shared/components/ui/Badge';
 import { ButtonLink } from '../../../shared/components/ui/Button';
 import { SectionTitle } from '../../../shared/components/ui/SectionTitle';
 import { WhatsAppButton } from '../../../shared/components/WhatsAppButton';
-import { categories, products, testimonials } from '../../../shared/mocks/products';
+import { useProducts } from '../../../shared/hooks/useProducts';
+import { testimonials } from '../../../shared/mocks/products';
 import { customOrderMessage } from '../../../shared/services/whatsapp';
 
 const heroImage = 'https://images.unsplash.com/photo-1512909006721-3d6018887383?auto=format&fit=crop&w=1800&q=90';
@@ -32,8 +32,8 @@ const trustItems = [
 ];
 
 export function HomePage() {
-  const featuredProducts = products.filter((product) => product.featured).slice(0, 3);
-  const [mainCategory, ...secondaryCategories] = categories;
+  const { products } = useProducts({ fallbackToMocks: false });
+  const featuredProducts = (products.some((product) => product.featured) ? products.filter((product) => product.featured) : products).slice(0, 3);
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
@@ -96,38 +96,6 @@ export function HomePage() {
           <p className="text-sm font-bold uppercase tracking-[0.18em] text-gold">Experiência afetiva</p>
           <p className="mt-3 text-2xl font-extrabold text-white">Um presente que chega com intenção, beleza e cuidado.</p>
         </motion.div>
-      </section>
-
-      <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-        <SectionTitle
-          eyebrow="Categorias"
-          title="Presentes para cada intenção"
-          description="Um catálogo com ritmo editorial: escolha pela ocasião, pelo sentimento ou pelo impacto que deseja causar."
-        />
-        <div className="grid gap-5 lg:grid-cols-[1.18fr_1fr]">
-          <Link to={`/catalogo?categoria=${mainCategory.id}`} className="group relative min-h-[430px] overflow-hidden rounded-[2.25rem] shadow-premium">
-            <img className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-105" src={mainCategory.image} alt={mainCategory.name} />
-            <div className="absolute inset-0 bg-gradient-to-t from-espresso/95 via-espresso/58 to-transparent" />
-            <div className="absolute bottom-0 p-8 text-white drop-shadow-[0_2px_12px_rgba(36,21,15,0.7)]">
-              <Badge tone="gold">Categoria destaque</Badge>
-              <h3 className="mt-5 font-display text-4xl font-extrabold">{mainCategory.name}</h3>
-              <p className="mt-3 max-w-md text-base leading-7 text-white/88">{mainCategory.description}</p>
-            </div>
-          </Link>
-
-          <div className="grid gap-5 sm:grid-cols-2">
-            {secondaryCategories.map((category) => (
-              <Link key={category.id} to={`/catalogo?categoria=${category.id}`} className="group relative min-h-52 overflow-hidden rounded-[2rem] shadow-premium">
-                <img className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-110" src={category.image} alt={category.name} />
-                <div className="absolute inset-0 bg-gradient-to-t from-espresso/84 via-espresso/28 to-transparent" />
-                <div className="absolute bottom-0 p-5 text-white">
-                  <h3 className="text-xl font-extrabold">{category.name}</h3>
-                  <p className="mt-2 text-sm leading-6 text-white/86">{category.description}</p>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
       </section>
 
       <section id="como-funciona" className="bg-white/55 py-16 dark:bg-[#1f130e]">

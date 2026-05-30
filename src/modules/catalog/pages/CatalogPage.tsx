@@ -5,20 +5,38 @@ import { useSearchParams } from 'react-router-dom';
 import { ProductCard } from '../../../shared/components/cards/ProductCard';
 import { SearchBar } from '../../../shared/components/SearchBar';
 import { Badge } from '../../../shared/components/ui/Badge';
+import { Loading } from '../../../shared/components/ui/Loading';
+import { Select, type SelectOption } from '../../../shared/components/ui/Select';
 import { SectionTitle } from '../../../shared/components/ui/SectionTitle';
-import { categories, products } from '../../../shared/mocks/products';
+import { useProducts } from '../../../shared/hooks/useProducts';
+import { categories } from '../../../shared/mocks/products';
 import type { ProductCategory } from '../../../shared/types/product';
 
 type SortOption = 'featured' | 'price-asc' | 'price-desc' | 'name';
 
-const categoryOptions = [{ id: 'todos', name: 'Todos' }, ...categories] as const;
+const categoryOptions: Array<SelectOption<ProductCategory | 'todos'>> = [
+  { value: 'todos', label: 'Todos' },
+  ...categories.map((categoryItem) => ({ value: categoryItem.id, label: categoryItem.name })),
+];
+const sortOptions: Array<SelectOption<SortOption>> = [
+  { value: 'featured', label: 'Destaques' },
+  { value: 'price-desc', label: 'Maior preco' },
+  { value: 'price-asc', label: 'Menor preco' },
+  { value: 'name', label: 'Nome' },
+];
+const validCategoryIds = new Set(categories.map((category) => category.id));
+
+function getValidInitialCategory(value: string | null) {
+  return value && validCategoryIds.has(value as ProductCategory) ? (value as ProductCategory) : 'todos';
+}
 
 export function CatalogPage() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const initialCategory = searchParams.get('categoria') as ProductCategory | null;
+  const initialCategory = getValidInitialCategory(searchParams.get('categoria'));
   const [query, setQuery] = useState('');
-  const [category, setCategory] = useState<ProductCategory | 'todos'>(initialCategory ?? 'todos');
-  const [sort, setSort] = useState<SortOption>('featured');
+  const [category, setCategory] = useState<ProductCategory | 'todos'>(initialCategory);
+  const [sort, setSort] = useState<SortOption>('name');
+  const { products, loading, error } = useProducts({ fallbackToMocks: false });
 
   const filteredProducts = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
@@ -37,7 +55,7 @@ export function CatalogPage() {
       if (sort === 'name') return a.name.localeCompare(b.name);
       return Number(b.featured) - Number(a.featured);
     });
-  }, [category, query, sort]);
+  }, [category, products, query, sort]);
 
   function changeCategory(value: ProductCategory | 'todos') {
     setCategory(value);
@@ -74,30 +92,22 @@ export function CatalogPage() {
 
         <div className="grid gap-4 border-t border-coffee/8 bg-cream/75 p-5 dark:border-white/14 dark:bg-[#1f130e] lg:grid-cols-[1fr_auto_auto]">
           <SearchBar value={query} onChange={setQuery} />
-          <label className="flex h-12 items-center gap-2 rounded-full border border-coffee/10 bg-white/90 px-4 text-sm font-semibold text-coffee shadow-sm dark:border-white/15 dark:bg-cream dark:text-espresso">
-            <SlidersHorizontal size={17} className="text-caramel" />
-            <select
-              className="bg-transparent outline-none"
-              value={category}
-              onChange={(event) => changeCategory(event.target.value as ProductCategory | 'todos')}
-              aria-label="Filtrar por categoria"
-            >
-              {categoryOptions.map((option) => (
-                <option key={option.id} value={option.id}>
-                  {option.name}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="flex h-12 items-center gap-2 rounded-full border border-coffee/10 bg-white/90 px-4 text-sm font-semibold text-coffee shadow-sm dark:border-white/15 dark:bg-cream dark:text-espresso">
-            <ArrowDownAZ size={17} className="text-caramel" />
-            <select className="bg-transparent outline-none" value={sort} onChange={(event) => setSort(event.target.value as SortOption)} aria-label="Ordenar produtos">
-              <option value="featured">Destaques</option>
-              <option value="price-asc">Menor preço</option>
-              <option value="price-desc">Maior preço</option>
-              <option value="name">Nome</option>
-            </select>
-          </label>
+          <Select
+            value={category}
+            options={categoryOptions}
+            onChange={changeCategory}
+            ariaLabel="Filtrar por categoria"
+            icon={<SlidersHorizontal size={17} />}
+            className="bg-white/90"
+          />
+          <Select
+            value={sort}
+            options={sortOptions}
+            onChange={setSort}
+            ariaLabel="Ordenar produtos"
+            icon={<ArrowDownAZ size={17} />}
+            className="bg-white/90"
+          />
         </div>
       </div>
 
@@ -106,7 +116,11 @@ export function CatalogPage() {
         <Badge tone="coffee">Carrinho visual: 0 itens</Badge>
       </div>
 
-      {filteredProducts.length > 0 ? (
+      {error && <p className="mt-6 rounded-2xl bg-gold/20 px-4 py-3 text-sm font-bold text-coffee">Nao foi possivel carregar os produtos do Firestore: {error}</p>}
+
+      {loading ? (
+        <Loading label="Carregando catalogo..." />
+      ) : filteredProducts.length > 0 ? (
         <motion.div layout className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           <AnimatePresence>
             {filteredProducts.map((product) => (

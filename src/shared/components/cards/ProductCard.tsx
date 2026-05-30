@@ -4,7 +4,6 @@ import { Link } from 'react-router-dom';
 import type { Product } from '../../types/product';
 import { productOrderMessage, formatCurrency } from '../../services/whatsapp';
 import { WhatsAppButton } from '../WhatsAppButton';
-import { Badge } from '../ui/Badge';
 
 type ProductCardProps = {
   product: Product;
@@ -30,7 +29,9 @@ export function ProductCard({ product }: ProductCardProps) {
           />
           <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-espresso/55 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
           <div className="absolute left-4 top-4">
-            <Badge tone={product.featured ? 'rose' : 'gold'}>{product.tag}</Badge>
+            <span className="inline-flex items-center rounded-full border border-white/70 bg-white px-3.5 py-1.5 text-xs font-extrabold text-espresso shadow-[0_10px_30px_rgba(36,21,15,0.28)]">
+              {product.tag}
+            </span>
           </div>
         </div>
       </Link>
@@ -60,8 +61,14 @@ export function ProductCard({ product }: ProductCardProps) {
             <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-caramel dark:text-gold">A partir de</p>
             <p className="text-2xl font-extrabold text-coffee dark:text-linen">{formatCurrency(product.price)}</p>
           </div>
-          <WhatsAppButton message={productOrderMessage(product.name)} size="sm" />
         </div>
+        <WhatsAppButton
+          message={productOrderMessage(product.name)}
+          size="md"
+          className="mt-5 w-full bg-[#1f8f4d] text-white shadow-[0_12px_28px_rgba(31,143,77,0.25)] hover:bg-[#187a40] dark:bg-[#25d366] dark:text-espresso dark:hover:bg-[#31df73]"
+        >
+          Pedir no WhatsApp
+        </WhatsAppButton>
         <Link
           to={`/produto/${product.slug}`}
           className="mt-4 inline-flex items-center gap-2 text-sm font-bold text-caramel transition hover:text-coffee dark:text-gold dark:hover:text-linen"
