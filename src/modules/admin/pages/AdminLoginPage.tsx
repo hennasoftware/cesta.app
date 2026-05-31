@@ -43,11 +43,11 @@ export function AdminLoginPage() {
   return (
     <div className="mx-auto flex min-h-[70vh] max-w-7xl items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
       <form onSubmit={handleSubmit} className="w-full max-w-md rounded-[2rem] border border-white/70 bg-white p-6 shadow-premium dark:border-white/14 dark:bg-[#24150f]">
-        <div className="grid h-28 w-32 place-items-center overflow-hidden">
+        <div className="mx-auto grid h-28 w-32 place-items-center overflow-hidden">
           <BrandLogo className="h-28 w-32" />
         </div>
-        <h1 className="mt-5 text-3xl font-extrabold text-coffee dark:text-cream">Admin Cesta.com</h1>
-        <p className="mt-3 text-sm leading-6 text-coffee/72 dark:text-cream/78">Acesso restrito ao dono da loja para gerenciar o catalogo.</p>
+        <h1 className="mt-5 text-center text-3xl font-extrabold text-coffee dark:text-cream">Admin Cesta.com</h1>
+        <p className="mx-auto mt-3 max-w-sm text-center text-sm leading-6 text-coffee/72 dark:text-cream/78">Acesso restrito ao dono da loja para gerenciar o catalogo.</p>
 
         {!isFirebaseConfigured && (
           <p className="mt-5 rounded-2xl bg-gold/20 px-4 py-3 text-sm font-bold text-coffee">
