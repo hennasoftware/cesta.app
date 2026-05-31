@@ -8,9 +8,8 @@ import { WhatsAppButton } from '../../../shared/components/WhatsAppButton';
 import { useProducts } from '../../../shared/hooks/useProducts';
 import { testimonials } from '../../../shared/mocks/products';
 import { customOrderMessage } from '../../../shared/services/whatsapp';
+import heroImage from '../../../assets/hero.png';
 import mobileHeroImage from '../../../assets/heroMobile.png';
-
-const heroImage = 'https://images.unsplash.com/photo-1512909006721-3d6018887383?auto=format&fit=crop&w=1800&q=90';
 
 const steps = [
   { icon: Gift, title: 'Escolha sua cesta', text: 'Navegue por composições prontas para cada ocasião.' },
@@ -42,11 +41,13 @@ export function HomePage() {
         <div className="relative left-1/2 h-[calc(100svh-5rem)] min-h-[620px] w-screen -translate-x-1/2 overflow-hidden bg-espresso shadow-glow sm:hidden">
           <img className="h-full w-full object-cover object-center" src={mobileHeroImage} alt="Cesta.com, WhatsApp (12) 3126-3230 e Instagram @cesta.com_" />
         </div>
-        <img
-          className="absolute inset-0 hidden h-full w-full object-cover object-center sm:block"
-          src={heroImage}
-          alt="Cesta premium Cesta.com"
-        />
+        <div className="absolute inset-0 hidden sm:block">
+          <img
+            className="h-full w-full object-cover object-center"
+            src={heroImage}
+            alt="Cesta premium Cesta.com"
+          />
+        </div>
         <div className="absolute inset-0 hidden bg-gradient-to-r from-espresso/90 via-coffee/68 to-coffee/18 sm:block" />
         <div className="absolute inset-x-0 bottom-0 hidden h-36 bg-gradient-to-t from-cream to-transparent dark:from-espresso sm:block" />
 

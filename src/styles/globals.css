@@ -5,8 +5,8 @@
 @tailwind utilities;
 
 :root {
-  color: #2e1c15;
-  background: #fff8ed;
+  color: #4a2117;
+  background: #fff6ec;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -15,6 +15,7 @@
 
 html {
   scroll-behavior: smooth;
+  scroll-padding-top: 5rem;
 }
 
 body {
@@ -31,18 +32,18 @@ select {
 }
 
 option {
-  color: #24150f;
-  background: #fff8ed;
+  color: #20110d;
+  background: #fff6ec;
 }
 
 ::selection {
-  color: #24150f;
-  background: #f1cfc9;
+  color: #20110d;
+  background: #d9fbf5;
 }
 
 .dark {
-  color: #fff8ed;
-  background: #170f0b;
+  color: #fff6ec;
+  background: #170c09;
 }
 
 .premium-scrollbar::-webkit-scrollbar {
@@ -52,5 +53,5 @@ option {
 
 .premium-scrollbar::-webkit-scrollbar-thumb {
   border-radius: 999px;
-  background: rgba(185, 128, 77, 0.42);
+  background: rgba(242, 105, 34, 0.42);
 }

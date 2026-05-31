@@ -10,7 +10,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
     <div className="min-h-screen bg-soft-radial dark:bg-none dark:bg-espresso">
       <ScrollManager />
       <Header />
-      <main className="pt-20 pb-24 md:pt-0 md:pb-0">{children}</main>
+      <main className="pb-24 md:pb-0">{children}</main>
       <Footer />
       <MobileBottomNav />
       <BackToTopButton />

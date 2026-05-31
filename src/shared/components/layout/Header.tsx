@@ -61,7 +61,7 @@ export function Header() {
   }, [isOpen]);
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 border-b border-coffee/8 bg-cream/95 backdrop-blur-xl dark:border-white/10 dark:bg-espresso/95 md:sticky">
+    <header className="sticky top-0 z-50 border-b border-coffee/8 bg-cream shadow-sm dark:border-white/10 dark:bg-espresso">
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <NavLink to="/" className="flex shrink-0 items-center gap-1.5 sm:gap-2" aria-label="Cesta.com">
           <BrandMark />
