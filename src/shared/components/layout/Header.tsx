@@ -1,7 +1,8 @@
 import { AnimatePresence, motion } from 'framer-motion';
-import { Gift, Home, Info, Menu, Moon, Search, ShoppingBag, Sun, X } from 'lucide-react';
+import { Home, Info, Menu, Moon, Search, Sun, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
+import { BrandLogo } from '../BrandLogo';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { buildWhatsAppUrl, customOrderMessage } from '../../services/whatsapp';
 
@@ -13,11 +14,8 @@ const navItems = [
 
 function BrandMark() {
   return (
-    <span className="relative grid h-12 w-12 place-items-center rounded-[1.35rem] bg-coffee text-cream shadow-glow dark:bg-gold dark:text-espresso">
-      <ShoppingBag size={21} />
-      <span className="absolute -right-1 -top-1 grid h-5 w-5 place-items-center rounded-full bg-rose text-white ring-2 ring-cream dark:ring-espresso">
-        <Gift size={11} />
-      </span>
+    <span className="grid h-14 w-16 place-items-center overflow-hidden sm:h-16 sm:w-20">
+      <BrandLogo className="h-14 w-16 sm:h-16 sm:w-20" />
     </span>
   );
 }
@@ -63,11 +61,11 @@ export function Header() {
   }, [isOpen]);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-coffee/8 bg-cream/86 backdrop-blur-xl dark:border-white/10 dark:bg-espresso/88">
+    <header className="fixed inset-x-0 top-0 z-50 border-b border-coffee/8 bg-cream/95 backdrop-blur-xl dark:border-white/10 dark:bg-espresso/95 md:sticky">
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <NavLink to="/" className="flex items-center gap-3" aria-label="Cesta.com">
+        <NavLink to="/" className="flex shrink-0 items-center gap-1.5 sm:gap-2" aria-label="Cesta.com">
           <BrandMark />
-          <span>
+          <span className="hidden sm:block">
             <span className="block font-display text-2xl font-extrabold text-coffee dark:text-cream">Cesta.com</span>
             <span className="block text-xs font-semibold text-caramel">Conectando afetos</span>
           </span>

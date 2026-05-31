@@ -1,6 +1,7 @@
 import { FormEvent, useState } from 'react';
 import { LockKeyhole, LogIn, Mail } from 'lucide-react';
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { BrandLogo } from '../../../shared/components/BrandLogo';
 import { Button } from '../../../shared/components/ui/Button';
 import { Input } from '../../../shared/components/ui/Input';
 import { isFirebaseConfigured } from '../../../shared/services/firebase';
@@ -42,8 +43,8 @@ export function AdminLoginPage() {
   return (
     <div className="mx-auto flex min-h-[70vh] max-w-7xl items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
       <form onSubmit={handleSubmit} className="w-full max-w-md rounded-[2rem] border border-white/70 bg-white p-6 shadow-premium dark:border-white/14 dark:bg-[#24150f]">
-        <div className="grid h-14 w-14 place-items-center rounded-2xl bg-espresso text-gold">
-          <LockKeyhole size={24} />
+        <div className="grid h-28 w-32 place-items-center overflow-hidden">
+          <BrandLogo className="h-28 w-32" />
         </div>
         <h1 className="mt-5 text-3xl font-extrabold text-coffee dark:text-cream">Admin Cesta.com</h1>
         <p className="mt-3 text-sm leading-6 text-coffee/72 dark:text-cream/78">Acesso restrito ao dono da loja para gerenciar o catalogo.</p>

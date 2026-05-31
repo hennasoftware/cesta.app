@@ -8,6 +8,7 @@ import { WhatsAppButton } from '../../../shared/components/WhatsAppButton';
 import { useProducts } from '../../../shared/hooks/useProducts';
 import { testimonials } from '../../../shared/mocks/products';
 import { customOrderMessage } from '../../../shared/services/whatsapp';
+import mobileHeroImage from '../../../assets/heroMobile.png';
 
 const heroImage = 'https://images.unsplash.com/photo-1512909006721-3d6018887383?auto=format&fit=crop&w=1800&q=90';
 
@@ -38,9 +39,8 @@ export function HomePage() {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
       <section className="relative overflow-hidden bg-espresso sm:min-h-[calc(100vh-5rem)]">
-        <div className="relative mx-4 mt-5 overflow-hidden rounded-[2rem] border border-white/12 shadow-glow sm:hidden">
-          <img className="aspect-[4/3] w-full object-cover object-center" src={heroImage} alt="Cesta premium Cesta.com" />
-          <div className="absolute inset-0 bg-gradient-to-t from-espresso/30 to-transparent" />
+        <div className="relative left-1/2 h-[calc(100svh-5rem)] min-h-[620px] w-screen -translate-x-1/2 overflow-hidden bg-espresso shadow-glow sm:hidden">
+          <img className="h-full w-full object-cover object-center" src={mobileHeroImage} alt="Cesta.com, WhatsApp (12) 3126-3230 e Instagram @cesta.com_" />
         </div>
         <img
           className="absolute inset-0 hidden h-full w-full object-cover object-center sm:block"
