@@ -1,0 +1,17 @@
+{
+  "name": "Cesta.com",
+  "short_name": "Cesta.com",
+  "description": "Cestas de cafe da manha e presentes personalizados.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fff6ec",
+  "theme_color": "#4a2117",
+  "icons": [
+    {
+      "src": "/icon.png",
+      "sizes": "320x306",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

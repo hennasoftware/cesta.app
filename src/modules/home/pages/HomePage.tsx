@@ -1,15 +1,17 @@
 import { motion } from 'framer-motion';
 import { ArrowRight, Gift, HeartHandshake, PackageCheck, ShieldCheck, Sparkles, Timer, Truck, Wand2 } from 'lucide-react';
+import { useState } from 'react';
 import { ProductCard } from '../../../shared/components/cards/ProductCard';
 import { Seo } from '../../../shared/components/Seo';
 import { Badge } from '../../../shared/components/ui/Badge';
-import { ButtonLink } from '../../../shared/components/ui/Button';
+import { Button, ButtonLink } from '../../../shared/components/ui/Button';
 import { SectionTitle } from '../../../shared/components/ui/SectionTitle';
 import { WhatsAppButton } from '../../../shared/components/WhatsAppButton';
 import { useProducts } from '../../../shared/hooks/useProducts';
 import { testimonials } from '../../../shared/mocks/products';
 import { customOrderMessage } from '../../../shared/services/whatsapp';
 import { brand } from '../../../shared/config/brand';
+import { OrderGuideModal } from '../components/OrderGuideModal';
 import heroImage from '../../../assets/hero.jpg';
 import mobileHeroImage from '../../../assets/heroMobile.jpg';
 
@@ -34,12 +36,14 @@ const trustItems = [
 ];
 
 export function HomePage() {
+  const [isOrderGuideOpen, setIsOrderGuideOpen] = useState(false);
   const { products } = useProducts({ fallbackToMocks: false });
   const featuredProducts = (products.some((product) => product.featured) ? products.filter((product) => product.featured) : products).slice(0, 3);
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
       <Seo title={`${brand.name} | ${brand.tagline}`} description="Cestas de cafe da manha, presentes personalizados e kits afetivos com entrega local e atendimento pelo WhatsApp." />
+      <OrderGuideModal open={isOrderGuideOpen} onClose={() => setIsOrderGuideOpen(false)} />
       <section className="relative overflow-hidden bg-espresso sm:min-h-[calc(100vh-5rem)]">
         <div className="relative left-1/2 h-[calc(100svh-5rem)] min-h-[620px] w-screen -translate-x-1/2 overflow-hidden bg-espresso shadow-glow sm:hidden">
           <img className="h-full w-full object-cover object-center" src={mobileHeroImage} alt="Cesta.com, WhatsApp (12) 3126-3230 e Instagram @cesta.com_" />
@@ -78,6 +82,9 @@ export function HomePage() {
               <WhatsAppButton message={customOrderMessage()} size="lg">
                 Fazer Pedido
               </WhatsAppButton>
+              <Button type="button" size="lg" variant="secondary" onClick={() => setIsOrderGuideOpen(true)}>
+                Pedido guiado
+              </Button>
             </div>
 
             <div className="mt-10 grid max-w-2xl gap-3 sm:grid-cols-3">

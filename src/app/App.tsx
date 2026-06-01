@@ -3,7 +3,7 @@ import { lazy, Suspense, useEffect, useState } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
 import heroImage from '../assets/hero.jpg';
 import mobileHeroImage from '../assets/heroMobile.jpg';
-import logoImage from '../assets/logo-display.png';
+import logoImage from '../assets/logo-ui.png';
 import { ProtectedRoute } from '../modules/admin/components/ProtectedRoute';
 import { AppLayout } from '../shared/components/layout/AppLayout';
 import { Loading } from '../shared/components/ui/Loading';

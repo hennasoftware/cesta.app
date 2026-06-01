@@ -2,6 +2,7 @@ import { LogOut, Package, Plus, ShieldCheck } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { Button } from '../../../shared/components/ui/Button';
 import { Seo } from '../../../shared/components/Seo';
+import { ConfirmDialog } from '../../../shared/components/ui/ConfirmDialog';
 import { Loading } from '../../../shared/components/ui/Loading';
 import { logoutAdmin } from '../../../shared/services/auth';
 import { deleteProduct } from '../../../shared/services/products';
@@ -17,19 +18,23 @@ export function AdminDashboardPage() {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [message, setMessage] = useState('');
   const [deleteError, setDeleteError] = useState('');
+  const [deletingProduct, setDeletingProduct] = useState<Product | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const formRef = useRef<HTMLDivElement>(null);
 
-  async function handleDelete(product: Product) {
-    const confirmed = window.confirm(`Excluir "${product.name}"? Esta acao nao pode ser desfeita.`);
-    if (!confirmed) return;
-
+  async function confirmDelete() {
+    if (!deletingProduct) return;
+    setIsDeleting(true);
     try {
-      await deleteProduct(product.id);
+      await deleteProduct(deletingProduct.id);
       setMessage('Produto excluido com sucesso.');
       setDeleteError('');
-      if (editingProduct?.id === product.id) setEditingProduct(null);
+      if (editingProduct?.id === deletingProduct.id) setEditingProduct(null);
+      setDeletingProduct(null);
     } catch (deleteProductError) {
       setDeleteError(deleteProductError instanceof Error ? deleteProductError.message : 'Nao foi possivel excluir o produto.');
+    } finally {
+      setIsDeleting(false);
     }
   }
 
@@ -49,6 +54,16 @@ export function AdminDashboardPage() {
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
       <Seo title="Gerenciar produtos | Cesta.com" description="Painel administrativo para gerenciar produtos do catalogo." />
+      <ConfirmDialog
+        open={Boolean(deletingProduct)}
+        title="Excluir produto?"
+        description={`Esta acao remove "${deletingProduct?.name ?? 'este produto'}" do catalogo e nao pode ser desfeita.`}
+        confirmLabel="Excluir"
+        tone="danger"
+        loading={isDeleting}
+        onCancel={() => (isDeleting ? undefined : setDeletingProduct(null))}
+        onConfirm={confirmDelete}
+      />
       <section className="rounded-[2rem] border border-white/70 bg-espresso p-6 text-cream shadow-premium dark:border-white/14 md:p-8">
         <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
           <div>
@@ -88,7 +103,7 @@ export function AdminDashboardPage() {
             </Button>
           </div>
 
-          {loading ? <Loading label="Carregando produtos..." variant="adminList" /> : <ProductList products={products} onEdit={handleEdit} onDelete={handleDelete} />}
+          {loading ? <Loading label="Carregando produtos..." variant="adminList" /> : <ProductList products={products} onEdit={handleEdit} onDelete={setDeletingProduct} />}
         </section>
       </div>
     </div>

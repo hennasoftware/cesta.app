@@ -1,4 +1,4 @@
-import logo from '../../assets/logo-display.png';
+import logo from '../../assets/logo-ui.png';
 
 type BrandLogoProps = {
   className?: string;

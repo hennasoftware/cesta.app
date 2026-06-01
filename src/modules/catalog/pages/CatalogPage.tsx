@@ -6,6 +6,8 @@ import { ProductCard } from '../../../shared/components/cards/ProductCard';
 import { SearchBar } from '../../../shared/components/SearchBar';
 import { Seo } from '../../../shared/components/Seo';
 import { Badge } from '../../../shared/components/ui/Badge';
+import { Button } from '../../../shared/components/ui/Button';
+import { WhatsAppButton } from '../../../shared/components/WhatsAppButton';
 import { Loading } from '../../../shared/components/ui/Loading';
 import { Select, type SelectOption } from '../../../shared/components/ui/Select';
 import { SectionTitle } from '../../../shared/components/ui/SectionTitle';
@@ -118,7 +120,19 @@ export function CatalogPage() {
         <Badge tone="coffee">Carrinho visual: 0 itens</Badge>
       </div>
 
-      {error && <p className="mt-6 rounded-2xl bg-gold/20 px-4 py-3 text-sm font-bold text-coffee">Nao foi possivel carregar os produtos do Firestore: {error}</p>}
+      {error && (
+        <div className="mt-6 flex flex-col gap-3 rounded-2xl bg-gold/20 px-4 py-4 text-sm font-bold text-coffee sm:flex-row sm:items-center sm:justify-between">
+          <span>Nao foi possivel carregar os produtos do Firestore: {error}</span>
+          <div className="flex flex-wrap gap-2">
+            <Button type="button" size="sm" variant="secondary" onClick={() => window.location.reload()}>
+              Tentar novamente
+            </Button>
+            <WhatsAppButton message="Ola, Cesta.com. Nao consegui carregar o catalogo e preciso de ajuda para fazer um pedido." size="sm">
+              Pedir ajuda
+            </WhatsAppButton>
+          </div>
+        </div>
+      )}
 
       {loading ? (
         <Loading label="Carregando catalogo..." variant="catalog" />
