@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { ProductCard } from '../../../shared/components/cards/ProductCard';
 import { SearchBar } from '../../../shared/components/SearchBar';
+import { Seo } from '../../../shared/components/Seo';
 import { Badge } from '../../../shared/components/ui/Badge';
 import { Loading } from '../../../shared/components/ui/Loading';
 import { Select, type SelectOption } from '../../../shared/components/ui/Select';
@@ -68,9 +69,10 @@ export function CatalogPage() {
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+      <Seo title="Catalogo de cestas | Cesta.com" description="Veja cestas, kits afetivos e presentes personalizados para pedir pelo WhatsApp." />
       <div className="overflow-hidden rounded-[2.5rem] border border-white/70 bg-white shadow-premium backdrop-blur dark:border-white/14 dark:bg-[#24150f]">
         <div className="grid gap-6 p-6 md:p-10 lg:grid-cols-[1fr_0.45fr] lg:items-end">
-          <div>
+          <div className="space-y-8">
             <Badge tone="rose">Catálogo virtual</Badge>
             <SectionTitle
               title="Escolha a cesta ideal para emocionar"
@@ -119,7 +121,7 @@ export function CatalogPage() {
       {error && <p className="mt-6 rounded-2xl bg-gold/20 px-4 py-3 text-sm font-bold text-coffee">Nao foi possivel carregar os produtos do Firestore: {error}</p>}
 
       {loading ? (
-        <Loading label="Carregando catalogo..." />
+        <Loading label="Carregando catalogo..." variant="catalog" />
       ) : filteredProducts.length > 0 ? (
         <motion.div layout className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           <AnimatePresence>

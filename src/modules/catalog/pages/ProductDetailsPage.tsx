@@ -3,6 +3,7 @@ import { ArrowLeft, CalendarHeart, Check, Gift, MessageSquareText, Sparkles, Sta
 import { useMemo, useState } from 'react';
 import { Link, Navigate, useParams } from 'react-router-dom';
 import { ProductCard } from '../../../shared/components/cards/ProductCard';
+import { Seo } from '../../../shared/components/Seo';
 import { WhatsAppButton } from '../../../shared/components/WhatsAppButton';
 import { Badge } from '../../../shared/components/ui/Badge';
 import { ButtonLink } from '../../../shared/components/ui/Button';
@@ -47,7 +48,7 @@ export function ProductDetailsPage() {
   }, [product]);
 
   if (loading) {
-    return <Loading label="Carregando produto..." />;
+    return <Loading label="Carregando produto..." variant="product" />;
   }
 
   if (!product) {
@@ -56,6 +57,7 @@ export function ProductDetailsPage() {
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+      <Seo title={`${product.name} | Cesta.com`} description={product.longDescription || product.description} />
       <Link to="/catalogo" className="inline-flex items-center gap-2 text-sm font-bold text-coffee/70 transition hover:text-caramel dark:text-cream/70">
         <ArrowLeft size={17} /> Voltar ao catálogo
       </Link>

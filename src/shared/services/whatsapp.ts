@@ -1,12 +1,12 @@
-const PHONE_NUMBER = '5512991706194';
+import { brand } from '../config/brand';
 
 export function buildWhatsAppUrl(message: string) {
-  return `https://wa.me/${PHONE_NUMBER}?text=${encodeURIComponent(message)}`;
+  return `https://wa.me/${brand.whatsappNumber}?text=${encodeURIComponent(message)}`;
 }
 
 export function productOrderMessage(productName: string) {
   return [
-    'Ola, Cesta.com.',
+    `Ola, ${brand.name}.`,
     '',
     `Tenho interesse no produto: ${productName}.`,
     '',
@@ -22,7 +22,7 @@ export function productOrderMessage(productName: string) {
 
 export function customOrderMessage() {
   return [
-    'Ola, Cesta.com.',
+    `Ola, ${brand.name}.`,
     '',
     'Gostaria de montar um pedido personalizado.',
     '',

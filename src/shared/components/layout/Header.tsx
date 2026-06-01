@@ -3,6 +3,7 @@ import { Home, Info, Menu, Moon, Search, Sun, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { BrandLogo } from '../BrandLogo';
+import { brand } from '../../config/brand';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { buildWhatsAppUrl, customOrderMessage } from '../../services/whatsapp';
 
@@ -63,11 +64,11 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 border-b border-coffee/8 bg-cream shadow-sm dark:border-white/10 dark:bg-espresso">
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <NavLink to="/" className="flex shrink-0 items-center gap-1.5 sm:gap-2" aria-label="Cesta.com">
+        <NavLink to="/" className="flex shrink-0 items-center gap-1.5 sm:gap-2" aria-label={brand.name}>
           <BrandMark />
           <span className="hidden sm:block">
-            <span className="block font-display text-2xl font-extrabold text-coffee dark:text-cream">Cesta.com</span>
-            <span className="block text-xs font-semibold text-caramel">Conectando afetos</span>
+            <span className="block font-display text-2xl font-extrabold text-coffee dark:text-cream">{brand.name}</span>
+            <span className="block text-xs font-semibold text-caramel">{brand.tagline}</span>
           </span>
         </NavLink>
 
@@ -84,7 +85,7 @@ export function Header() {
             className="inline-flex h-10 items-center justify-center rounded-full border border-coffee/12 bg-white px-4 text-sm font-bold text-espresso shadow-sm transition hover:bg-cream dark:border-gold/25 dark:bg-cream dark:text-espresso dark:hover:bg-white"
             onClick={toggleDarkMode}
             type="button"
-            aria-label="Alternar tema"
+            aria-label={isDark ? 'Ativar tema claro' : 'Ativar tema escuro'}
           >
             {isDark ? <Sun size={17} /> : <Moon size={17} />}
           </button>
@@ -155,6 +156,7 @@ export function Header() {
                     className={`${actionClass} bg-white text-espresso ring-1 ring-coffee/8 hover:bg-cream dark:bg-cream dark:text-espresso dark:ring-gold/15 dark:hover:bg-white`}
                     onClick={toggleDarkMode}
                     type="button"
+                    aria-label={isDark ? 'Ativar tema claro' : 'Ativar tema escuro'}
                   >
                     {isDark ? <Sun size={17} /> : <Moon size={17} />}
                     Tema

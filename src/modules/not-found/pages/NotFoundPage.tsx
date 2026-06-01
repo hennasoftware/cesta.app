@@ -1,5 +1,6 @@
 import { ArrowLeft, Home, SearchX } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { Seo } from '../../../shared/components/Seo';
 import { ButtonLink } from '../../../shared/components/ui/Button';
 
 export function NotFoundPage() {
@@ -7,6 +8,7 @@ export function NotFoundPage() {
 
   return (
     <section className="mx-auto flex min-h-[70vh] max-w-7xl items-center px-4 py-14 sm:px-6 lg:px-8">
+      <Seo title="Pagina nao encontrada | Cesta.com" description="A pagina solicitada nao foi encontrada." />
       <div className="grid w-full gap-8 overflow-hidden rounded-[2.5rem] border border-white/70 bg-white shadow-premium dark:border-white/14 dark:bg-[#24150f] lg:grid-cols-[0.9fr_1.1fr]">
         <div className="bg-espresso p-8 text-cream md:p-12">
           <div className="grid h-16 w-16 place-items-center rounded-2xl bg-gold text-espresso">

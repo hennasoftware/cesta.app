@@ -1,5 +1,6 @@
 import { Instagram, MapPin, MessageCircle } from 'lucide-react';
 import { BrandLogo } from '../BrandLogo';
+import { brand } from '../../config/brand';
 import { buildWhatsAppUrl, customOrderMessage } from '../../services/whatsapp';
 
 export function Footer() {
@@ -12,8 +13,8 @@ export function Footer() {
               <BrandLogo className="h-16 w-20" />
             </span>
             <div>
-              <p className="font-display text-2xl font-extrabold text-coffee dark:text-cream">Cesta.com</p>
-              <p className="text-sm font-semibold text-caramel">Conectando afetos</p>
+              <p className="font-display text-2xl font-extrabold text-coffee dark:text-cream">{brand.name}</p>
+              <p className="text-sm font-semibold text-caramel">{brand.tagline}</p>
             </div>
           </div>
           <p className="mt-5 max-w-md text-sm leading-7 text-coffee/72 dark:text-cream/78">
@@ -24,10 +25,10 @@ export function Footer() {
         <div className="space-y-4 text-sm text-coffee/72 dark:text-cream/72">
           <p className="font-bold text-coffee dark:text-cream">Contato</p>
           <a className="flex items-center gap-3 hover:text-caramel" href={buildWhatsAppUrl(customOrderMessage())}>
-            <MessageCircle size={17} /> WhatsApp: (12) 3126-3230
+            <MessageCircle size={17} /> WhatsApp: {brand.phoneDisplay}
           </a>
-          <a className="flex items-center gap-3 hover:text-caramel" href="https://www.instagram.com/cesta.com_" target="_blank" rel="noreferrer">
-            <Instagram size={17} /> @cesta.com_
+          <a className="flex items-center gap-3 hover:text-caramel" href={brand.instagramUrl} target="_blank" rel="noreferrer">
+            <Instagram size={17} /> {brand.instagramHandle}
           </a>
           <p className="flex items-center gap-3">
             <MapPin size={17} /> Guaratinguetá - SP

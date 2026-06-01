@@ -8,7 +8,7 @@ export function ProtectedRoute({ children }: { children: ReactNode }) {
   const location = useLocation();
 
   if (loading) {
-    return <Loading label="Verificando acesso..." />;
+    return <Loading label="Verificando acesso..." variant="auth" />;
   }
 
   if (!user) {

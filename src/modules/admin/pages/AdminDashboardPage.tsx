@@ -1,6 +1,7 @@
 import { LogOut, Package, Plus, ShieldCheck } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { Button } from '../../../shared/components/ui/Button';
+import { Seo } from '../../../shared/components/Seo';
 import { Loading } from '../../../shared/components/ui/Loading';
 import { logoutAdmin } from '../../../shared/services/auth';
 import { deleteProduct } from '../../../shared/services/products';
@@ -47,6 +48,7 @@ export function AdminDashboardPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+      <Seo title="Gerenciar produtos | Cesta.com" description="Painel administrativo para gerenciar produtos do catalogo." />
       <section className="rounded-[2rem] border border-white/70 bg-espresso p-6 text-cream shadow-premium dark:border-white/14 md:p-8">
         <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
           <div>
@@ -86,7 +88,7 @@ export function AdminDashboardPage() {
             </Button>
           </div>
 
-          {loading ? <Loading label="Carregando produtos..." /> : <ProductList products={products} onEdit={handleEdit} onDelete={handleDelete} />}
+          {loading ? <Loading label="Carregando produtos..." variant="adminList" /> : <ProductList products={products} onEdit={handleEdit} onDelete={handleDelete} />}
         </section>
       </div>
     </div>
