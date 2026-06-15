@@ -143,6 +143,7 @@ export async function imageFileToProductPhoto(file: File, maxDataUrlLength = 220
   const image = await loadImage(file);
   const dimensions = [900, 760, 640, 520, 420];
   const qualities = [0.78, 0.68, 0.58, 0.48, 0.38, 0.3];
+  const outputTypes = getSupportedCanvasImageTypes();
 
   for (const maxSize of dimensions) {
     const { width, height } = fitSize(image.width, image.height, maxSize);
@@ -152,17 +153,32 @@ export async function imageFileToProductPhoto(file: File, maxDataUrlLength = 220
 
     const context = canvas.getContext('2d');
     if (!context) throw new Error('Nao foi possivel processar a imagem.');
+    context.fillStyle = '#ffffff';
+    context.fillRect(0, 0, width, height);
     context.drawImage(image, 0, 0, width, height);
 
-    for (const quality of qualities) {
-      const dataUrl = canvas.toDataURL('image/webp', quality);
-      if (dataUrl.length <= maxDataUrlLength) {
-        return dataUrl;
+    for (const outputType of outputTypes) {
+      for (const quality of qualities) {
+        const dataUrl = canvas.toDataURL(outputType, quality);
+        if (dataUrl.length <= maxDataUrlLength) {
+          return dataUrl;
+        }
       }
     }
   }
 
   throw new Error('A imagem ficou grande demais para salvar no Firestore. Tente uma foto menor ou mais simples.');
+}
+
+function getSupportedCanvasImageTypes() {
+  const canvas = document.createElement('canvas');
+  canvas.width = 1;
+  canvas.height = 1;
+
+  const types = ['image/webp', 'image/jpeg'];
+  const supportedTypes = types.filter((type) => canvas.toDataURL(type, 0.8).startsWith(`data:${type}`));
+
+  return supportedTypes.length ? supportedTypes : ['image/jpeg'];
 }
 
 function fitSize(width: number, height: number, maxSize: number) {
