@@ -45,6 +45,14 @@ function getPaginationItems(currentPage: number, totalPages: number): Pagination
   return [1, 'ellipsis-start', currentPage - 1, currentPage, currentPage + 1, 'ellipsis-end', totalPages];
 }
 
+function getMobilePaginationItems(currentPage: number, totalPages: number): number[] {
+  if (totalPages <= 3) return Array.from({ length: totalPages }, (_, index) => index + 1);
+  if (currentPage <= 2) return [1, 2, 3];
+  if (currentPage >= totalPages - 1) return [totalPages - 2, totalPages - 1, totalPages];
+
+  return [currentPage - 1, currentPage, currentPage + 1];
+}
+
 export function CatalogPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const initialCategory = getValidInitialCategory(searchParams.get('categoria'));
@@ -79,6 +87,7 @@ export function CatalogPage() {
   const visibleStart = filteredProducts.length ? firstProductIndex + 1 : 0;
   const visibleEnd = Math.min(firstProductIndex + PRODUCTS_PER_PAGE, filteredProducts.length);
   const paginationItems = useMemo(() => getPaginationItems(currentPage, totalPages), [currentPage, totalPages]);
+  const mobilePaginationItems = useMemo(() => getMobilePaginationItems(currentPage, totalPages), [currentPage, totalPages]);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -149,7 +158,7 @@ export function CatalogPage() {
         </div>
       </div>
 
-      <div id="catalog-results" className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div id="catalog-results" className="mt-8">
         <p className="text-sm font-semibold text-coffee/72 dark:text-cream/78">
           {filteredProducts.length} produto(s) encontrados
           {filteredProducts.length > 0 && (
@@ -158,7 +167,6 @@ export function CatalogPage() {
             </span>
           )}
         </p>
-        <Badge tone="coffee">Carrinho visual: 0 itens</Badge>
       </div>
 
       {error && (
@@ -179,7 +187,7 @@ export function CatalogPage() {
         <Loading label="Carregando catalogo..." variant="catalog" />
       ) : filteredProducts.length > 0 ? (
         <>
-          <div className="mt-6 grid items-stretch gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-5 grid items-stretch gap-4 sm:mt-6 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
             {paginatedProducts.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
@@ -205,9 +213,24 @@ export function CatalogPage() {
               </button>
 
               <div className="flex min-w-0 items-center justify-center">
-                <span className="rounded-full bg-cream px-4 py-2 text-sm font-extrabold text-coffee dark:bg-[#1f130e] dark:text-cream sm:hidden">
-                  {currentPage} / {totalPages}
-                </span>
+                <div className="flex items-center gap-1 rounded-full bg-cream p-1 dark:bg-[#1f130e] sm:hidden">
+                  {mobilePaginationItems.map((page) => (
+                    <button
+                      key={page}
+                      type="button"
+                      aria-label={`Ir para pagina ${page}`}
+                      aria-current={page === currentPage ? 'page' : undefined}
+                      onClick={() => changePage(page)}
+                      className={`grid h-9 min-w-9 place-items-center rounded-full px-2 text-sm font-extrabold transition ${
+                        page === currentPage
+                          ? 'bg-coffee text-cream shadow-[0_8px_18px_rgba(74,33,23,0.20)] dark:bg-gold dark:text-espresso'
+                          : 'text-coffee/65 hover:bg-white hover:text-coffee dark:text-cream/70 dark:hover:bg-white/10 dark:hover:text-cream'
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  ))}
+                </div>
 
                 <div className="hidden items-center gap-1 rounded-full bg-cream p-1 dark:bg-[#1f130e] sm:flex">
                   {paginationItems.map((item) =>

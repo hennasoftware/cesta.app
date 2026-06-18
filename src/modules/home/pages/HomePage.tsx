@@ -112,21 +112,23 @@ export function HomePage() {
       <section id="como-funciona" className="bg-white/55 py-16 dark:bg-[#1f130e]">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <SectionTitle eyebrow="Como funciona" title="Do carinho à entrega em poucos passos" />
-          <div className="grid gap-5 md:grid-cols-4">
+          <div className="grid gap-3 sm:grid-cols-2 sm:gap-5 md:grid-cols-4">
             {steps.map((step, index) => (
               <motion.div
                 key={step.title}
-                className="rounded-[2rem] border border-coffee/8 bg-cream/90 p-6 shadow-sm dark:border-white/14 dark:bg-[#2a1a13]"
+                className="flex items-start gap-4 rounded-lg border border-coffee/8 bg-cream/90 p-4 shadow-sm dark:border-white/14 dark:bg-[#2a1a13] sm:block sm:p-6"
                 initial={{ opacity: 0, y: 18 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.08 }}
               >
-                <span className="grid h-12 w-12 place-items-center rounded-2xl bg-coffee text-cream dark:bg-gold dark:text-espresso">
+                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-md bg-coffee text-cream dark:bg-gold dark:text-espresso sm:h-12 sm:w-12">
                   <step.icon size={21} />
                 </span>
-                <h3 className="mt-5 text-lg font-extrabold text-coffee dark:text-gold">{step.title}</h3>
-                <p className="mt-3 text-sm leading-6 text-coffee/70 dark:text-linen/90">{step.text}</p>
+                <div>
+                  <h3 className="text-base font-extrabold text-coffee dark:text-gold sm:mt-5 sm:text-lg">{step.title}</h3>
+                  <p className="mt-1.5 text-sm leading-6 text-coffee/70 dark:text-linen/90 sm:mt-3">{step.text}</p>
+                </div>
               </motion.div>
             ))}
           </div>
@@ -143,12 +145,16 @@ export function HomePage() {
             </ButtonLink>
           }
         />
-        <div className="grid gap-5 md:grid-cols-4">
+        <div className="grid gap-3 sm:grid-cols-2 sm:gap-5 md:grid-cols-4">
           {benefits.map((benefit) => (
-            <div key={benefit.title} className="rounded-[2rem] border border-white/70 bg-white p-6 shadow-premium dark:border-white/14 dark:bg-[#24150f]">
-              <benefit.icon className="text-sage dark:text-pistachio" size={28} />
-              <h3 className="mt-5 text-lg font-extrabold text-coffee dark:text-gold">{benefit.title}</h3>
-              <p className="mt-3 text-sm leading-6 text-coffee/70 dark:text-linen/90">{benefit.text}</p>
+            <div key={benefit.title} className="flex items-start gap-4 rounded-lg border border-coffee/8 bg-white p-4 shadow-[0_10px_30px_rgba(74,33,23,0.07)] dark:border-white/14 dark:bg-[#24150f] sm:block sm:p-6 sm:shadow-premium">
+              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-md bg-pistachio">
+                <benefit.icon className="text-sage" size={23} />
+              </span>
+              <div>
+                <h3 className="text-base font-extrabold text-coffee dark:text-gold sm:mt-5 sm:text-lg">{benefit.title}</h3>
+                <p className="mt-1.5 text-sm leading-6 text-coffee/70 dark:text-linen/90 sm:mt-3">{benefit.text}</p>
+              </div>
             </div>
           ))}
         </div>
@@ -156,7 +162,7 @@ export function HomePage() {
 
       <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
         <SectionTitle eyebrow="Destaques" title="Cestas com alto apelo de presente" />
-        <div className="grid gap-6 md:grid-cols-3">
+        <div className="grid gap-4 sm:gap-6 md:grid-cols-3">
           {featuredProducts.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
