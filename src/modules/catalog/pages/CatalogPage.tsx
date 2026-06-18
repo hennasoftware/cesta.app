@@ -1,6 +1,6 @@
-import { AnimatePresence, motion } from 'framer-motion';
-import { ArrowDownAZ, Gift, SearchX, SlidersHorizontal, Sparkles } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { motion } from 'framer-motion';
+import { ArrowDownAZ, ChevronLeft, ChevronRight, Gift, MoreHorizontal, SearchX, SlidersHorizontal, Sparkles } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { ProductCard } from '../../../shared/components/cards/ProductCard';
 import { SearchBar } from '../../../shared/components/SearchBar';
@@ -16,6 +16,9 @@ import { categories } from '../../../shared/mocks/products';
 import type { ProductCategory } from '../../../shared/types/product';
 
 type SortOption = 'featured' | 'price-asc' | 'price-desc' | 'name';
+type PaginationItem = number | 'ellipsis-start' | 'ellipsis-end';
+
+const PRODUCTS_PER_PAGE = 6;
 
 const categoryOptions: Array<SelectOption<ProductCategory | 'todos'>> = [
   { value: 'todos', label: 'Todos' },
@@ -33,12 +36,22 @@ function getValidInitialCategory(value: string | null) {
   return value && validCategoryIds.has(value as ProductCategory) ? (value as ProductCategory) : 'todos';
 }
 
+function getPaginationItems(currentPage: number, totalPages: number): PaginationItem[] {
+  if (totalPages <= 5) return Array.from({ length: totalPages }, (_, index) => index + 1);
+
+  if (currentPage <= 3) return [1, 2, 3, 4, 'ellipsis-end', totalPages];
+  if (currentPage >= totalPages - 2) return [1, 'ellipsis-start', totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
+
+  return [1, 'ellipsis-start', currentPage - 1, currentPage, currentPage + 1, 'ellipsis-end', totalPages];
+}
+
 export function CatalogPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const initialCategory = getValidInitialCategory(searchParams.get('categoria'));
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState<ProductCategory | 'todos'>(initialCategory);
   const [sort, setSort] = useState<SortOption>('name');
+  const [currentPage, setCurrentPage] = useState(1);
   const { products, loading, error } = useProducts({ fallbackToMocks: false });
 
   const filteredProducts = useMemo(() => {
@@ -60,6 +73,21 @@ export function CatalogPage() {
     });
   }, [category, products, query, sort]);
 
+  const totalPages = Math.max(1, Math.ceil(filteredProducts.length / PRODUCTS_PER_PAGE));
+  const firstProductIndex = (currentPage - 1) * PRODUCTS_PER_PAGE;
+  const paginatedProducts = filteredProducts.slice(firstProductIndex, firstProductIndex + PRODUCTS_PER_PAGE);
+  const visibleStart = filteredProducts.length ? firstProductIndex + 1 : 0;
+  const visibleEnd = Math.min(firstProductIndex + PRODUCTS_PER_PAGE, filteredProducts.length);
+  const paginationItems = useMemo(() => getPaginationItems(currentPage, totalPages), [currentPage, totalPages]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [category, query, sort]);
+
+  useEffect(() => {
+    setCurrentPage((page) => Math.min(page, totalPages));
+  }, [totalPages]);
+
   function changeCategory(value: ProductCategory | 'todos') {
     setCategory(value);
     if (value === 'todos') {
@@ -67,6 +95,12 @@ export function CatalogPage() {
       return;
     }
     setSearchParams({ categoria: value });
+  }
+
+  function changePage(page: number) {
+    const nextPage = Math.min(Math.max(page, 1), totalPages);
+    setCurrentPage(nextPage);
+    document.getElementById('catalog-results')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   return (
@@ -115,8 +149,15 @@ export function CatalogPage() {
         </div>
       </div>
 
-      <div className="mt-8 flex items-center justify-between">
-        <p className="text-sm font-semibold text-coffee/72 dark:text-cream/78">{filteredProducts.length} produto(s) encontrados</p>
+      <div id="catalog-results" className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-sm font-semibold text-coffee/72 dark:text-cream/78">
+          {filteredProducts.length} produto(s) encontrados
+          {filteredProducts.length > 0 && (
+            <span className="ml-2 text-coffee/55 dark:text-cream/60">
+              Exibindo {visibleStart}-{visibleEnd}
+            </span>
+          )}
+        </p>
         <Badge tone="coffee">Carrinho visual: 0 itens</Badge>
       </div>
 
@@ -137,13 +178,75 @@ export function CatalogPage() {
       {loading ? (
         <Loading label="Carregando catalogo..." variant="catalog" />
       ) : filteredProducts.length > 0 ? (
-        <motion.div layout className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          <AnimatePresence>
-            {filteredProducts.map((product) => (
+        <>
+          <div className="mt-6 grid items-stretch gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {paginatedProducts.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
-          </AnimatePresence>
-        </motion.div>
+          </div>
+
+          <nav className="mt-8 flex flex-col gap-4 rounded-[1.75rem] border border-coffee/10 bg-white/85 p-3 shadow-[0_18px_50px_rgba(74,33,23,0.08)] backdrop-blur dark:border-white/14 dark:bg-[#24150f]/90 sm:flex-row sm:items-center sm:justify-between sm:px-4" aria-label="Paginacao do catalogo">
+            <div className="flex items-center justify-between gap-3 sm:block">
+              <p className="text-xs font-extrabold uppercase tracking-[0.16em] text-caramel dark:text-gold">Pagina {currentPage} de {totalPages}</p>
+              <p className="text-sm font-semibold text-coffee/68 dark:text-cream/72">
+                {visibleStart}-{visibleEnd} de {filteredProducts.length} produtos
+              </p>
+            </div>
+
+            <div className="grid grid-cols-[44px_1fr_44px] items-center gap-2 sm:flex sm:justify-end">
+              <button
+                type="button"
+                aria-label="Pagina anterior"
+                onClick={() => changePage(currentPage - 1)}
+                disabled={currentPage === 1}
+                className="grid h-11 w-11 place-items-center rounded-full border border-coffee/10 bg-cream text-coffee transition hover:border-gold/60 hover:bg-white disabled:cursor-not-allowed disabled:opacity-40 dark:border-white/14 dark:bg-[#1f130e] dark:text-cream dark:hover:bg-white/10"
+              >
+                <ChevronLeft size={18} />
+              </button>
+
+              <div className="flex min-w-0 items-center justify-center">
+                <span className="rounded-full bg-cream px-4 py-2 text-sm font-extrabold text-coffee dark:bg-[#1f130e] dark:text-cream sm:hidden">
+                  {currentPage} / {totalPages}
+                </span>
+
+                <div className="hidden items-center gap-1 rounded-full bg-cream p-1 dark:bg-[#1f130e] sm:flex">
+                  {paginationItems.map((item) =>
+                    typeof item === 'number' ? (
+                      <button
+                        key={item}
+                        type="button"
+                        aria-label={`Ir para pagina ${item}`}
+                        aria-current={item === currentPage ? 'page' : undefined}
+                        onClick={() => changePage(item)}
+                        className={`grid h-10 min-w-10 place-items-center rounded-full px-3 text-sm font-extrabold transition ${
+                          item === currentPage
+                            ? 'bg-coffee text-cream shadow-[0_10px_24px_rgba(74,33,23,0.20)] dark:bg-gold dark:text-espresso'
+                            : 'text-coffee/70 hover:bg-white hover:text-coffee dark:text-cream/70 dark:hover:bg-white/10 dark:hover:text-cream'
+                        }`}
+                      >
+                        {item}
+                      </button>
+                    ) : (
+                      <span key={item} className="grid h-10 min-w-9 place-items-center text-coffee/38 dark:text-cream/40">
+                        <MoreHorizontal size={17} />
+                      </span>
+                    ),
+                  )}
+                </div>
+              </div>
+
+              <button
+                type="button"
+                aria-label="Proxima pagina"
+                onClick={() => changePage(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className="grid h-11 w-11 place-items-center rounded-full bg-coffee text-cream shadow-[0_12px_26px_rgba(74,33,23,0.22)] transition hover:bg-espresso disabled:cursor-not-allowed disabled:opacity-40 dark:bg-gold dark:text-espresso dark:hover:bg-cream"
+              >
+                <ChevronRight size={18} />
+              </button>
+            </div>
+          </nav>
+        </>
       ) : (
         <div className="mt-8 rounded-[2.5rem] border border-coffee/8 bg-white p-10 text-center shadow-sm dark:border-white/14 dark:bg-[#24150f]">
           <SearchX className="mx-auto text-caramel" size={36} />
