@@ -64,7 +64,7 @@ export function Header() {
   }, [isOpen]);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-coffee/8 bg-cream shadow-sm dark:border-white/10 dark:bg-espresso">
+    <header className="sticky top-0 z-[60] border-b border-coffee/8 bg-cream shadow-sm dark:border-white/10 dark:bg-espresso">
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <NavLink to="/" className="flex shrink-0 items-center gap-1.5 sm:gap-2" aria-label={brand.name}>
           <BrandMark />
@@ -169,13 +169,13 @@ export function Header() {
           <motion.div className="fixed inset-0 top-20 z-40 md:hidden" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
             <button className="absolute inset-0 w-full cursor-default bg-espresso/18 backdrop-blur-[2px]" onClick={() => setIsOpen(false)} aria-label="Fechar menu" type="button" />
             <motion.div
-              className="relative border-t border-coffee/10 bg-cream px-4 pb-5 shadow-premium ring-1 ring-white/70 backdrop-blur-3xl dark:border-gold/20 dark:bg-[#2a1a13] dark:ring-gold/10"
+              className="relative flex h-full max-h-[calc(100dvh-5rem)] flex-col overflow-hidden border-t border-coffee/10 bg-cream shadow-premium ring-1 ring-white/70 backdrop-blur-3xl dark:border-gold/20 dark:bg-[#2a1a13] dark:ring-gold/10"
               initial={{ y: -18, opacity: 0, scale: 0.98 }}
               animate={{ y: 0, opacity: 1, scale: 1 }}
               exit={{ y: -14, opacity: 0, scale: 0.98 }}
               transition={{ duration: 0.22, ease: 'easeOut' }}
             >
-              <nav className="mx-auto flex max-w-7xl flex-col gap-2 pt-4">
+              <nav className="premium-scrollbar mx-auto flex w-full max-w-7xl flex-1 flex-col gap-2 overflow-y-auto overscroll-contain px-4 pb-4 pt-4">
                 {navItems.map((item, index) => {
                   const Icon = item.icon;
 
@@ -226,7 +226,9 @@ export function Header() {
                     ))}
                   </div>
                 </div>
-                <div className="mt-3 grid grid-cols-2 gap-2">
+              </nav>
+              <div className="shrink-0 border-t border-coffee/10 bg-cream/96 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3 shadow-[0_-12px_30px_rgba(74,33,23,0.08)] backdrop-blur-xl dark:border-gold/15 dark:bg-[#2a1a13]/96">
+                <div className="mx-auto grid max-w-7xl grid-cols-2 gap-2">
                   <button
                     className={`${actionClass} bg-white text-espresso ring-1 ring-coffee/8 hover:bg-cream dark:bg-cream dark:text-espresso dark:ring-gold/15 dark:hover:bg-white`}
                     onClick={toggleDarkMode}
@@ -245,7 +247,7 @@ export function Header() {
                     Pedido
                   </a>
                 </div>
-              </nav>
+              </div>
             </motion.div>
           </motion.div>
         )}
