@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { ArrowDownAZ, ChevronLeft, ChevronRight, Gift, MoreHorizontal, SearchX, Sparkles } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { useDeferredValue, useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { ProductCard } from '../../../shared/components/cards/ProductCard';
 import { SearchBar } from '../../../shared/components/SearchBar';
@@ -8,7 +8,7 @@ import { Seo } from '../../../shared/components/Seo';
 import { Badge } from '../../../shared/components/ui/Badge';
 import { Button } from '../../../shared/components/ui/Button';
 import { WhatsAppButton } from '../../../shared/components/WhatsAppButton';
-import { Loading } from '../../../shared/components/ui/Loading';
+import { CatalogSkeleton } from '../../../shared/components/ui/Skeletons';
 import { Select, type SelectOption } from '../../../shared/components/ui/Select';
 import { SectionTitle } from '../../../shared/components/ui/SectionTitle';
 import {
@@ -18,15 +18,15 @@ import {
   normalizeProductClassification,
   productCategories,
 } from '../../../shared/config/categories';
-import { useProducts } from '../../../shared/hooks/useProducts';
+import { useCatalogProducts } from '../../../shared/hooks/useProducts';
+import type { CatalogSort } from '../../../shared/services/products';
 import type { ProductCategory, ProductSubcategory } from '../../../shared/types/product';
 
-type SortOption = 'featured' | 'price-asc' | 'price-desc' | 'name';
 type PaginationItem = number | 'ellipsis-start' | 'ellipsis-end';
 
 const PRODUCTS_PER_PAGE = 6;
 
-const sortOptions: Array<SelectOption<SortOption>> = [
+const sortOptions: Array<SelectOption<CatalogSort>> = [
   { value: 'featured', label: 'Destaques' },
   { value: 'price-desc', label: 'Maior preco' },
   { value: 'price-asc', label: 'Menor preco' },
@@ -52,72 +52,28 @@ function getMobilePaginationItems(currentPage: number, totalPages: number): numb
 export function CatalogPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [query, setQuery] = useState('');
-  const [sort, setSort] = useState<SortOption>('name');
+  const deferredQuery = useDeferredValue(query);
+  const [sort, setSort] = useState<CatalogSort>('name');
   const [currentPage, setCurrentPage] = useState(1);
-  const { products, loading, error } = useProducts({ fallbackToMocks: false });
   const searchParamsKey = searchParams.toString();
   const requestedCategory = searchParams.get('categoria');
   const category = normalizeCategoryFilter(requestedCategory) ?? 'todos';
   const subcategoryParam = searchParams.get('subcategoria');
   const subcategory: ProductSubcategory | 'todas' =
     category === 'presentes' && isProductSubcategory(subcategoryParam) ? subcategoryParam : 'todas';
+  const { products: paginatedProducts, totalProducts, loading, error } = useCatalogProducts({
+    category,
+    subcategory,
+    sort,
+    page: currentPage,
+    pageSize: PRODUCTS_PER_PAGE,
+    search: deferredQuery,
+  });
 
-  const productsMatchingSearch = useMemo(() => {
-    const normalizedQuery = query.trim().toLowerCase();
-
-    return products.filter((product) =>
-      [product.name, product.description, product.tag]
-        .join(' ')
-        .toLowerCase()
-        .includes(normalizedQuery),
-    );
-  }, [products, query]);
-
-  const categoryCounts = useMemo(
-    () =>
-      Object.fromEntries(
-        productCategories.map((categoryItem) => [
-          categoryItem.id,
-          productsMatchingSearch.filter((product) => product.category === categoryItem.id).length,
-        ]),
-      ) as Record<ProductCategory, number>,
-    [productsMatchingSearch],
-  );
-
-  const subcategoryCounts = useMemo(
-    () =>
-      Object.fromEntries(
-        giftSubcategories.map((subcategoryItem) => [
-          subcategoryItem.id,
-          productsMatchingSearch.filter(
-            (product) => product.category === 'presentes' && product.subcategory === subcategoryItem.id,
-          ).length,
-        ]),
-      ) as Record<ProductSubcategory, number>,
-    [productsMatchingSearch],
-  );
-
-  const filteredProducts = useMemo(() => {
-    const result = productsMatchingSearch.filter((product) => {
-      const matchesCategory = category === 'todos' || product.category === category;
-      const matchesSubcategory =
-        category !== 'presentes' || subcategory === 'todas' || product.subcategory === subcategory;
-      return matchesCategory && matchesSubcategory;
-    });
-
-    return [...result].sort((a, b) => {
-      if (sort === 'price-asc') return a.price - b.price;
-      if (sort === 'price-desc') return b.price - a.price;
-      if (sort === 'name') return a.name.localeCompare(b.name);
-      return Number(b.featured) - Number(a.featured);
-    });
-  }, [category, productsMatchingSearch, sort, subcategory]);
-
-  const totalPages = Math.max(1, Math.ceil(filteredProducts.length / PRODUCTS_PER_PAGE));
+  const totalPages = Math.max(1, Math.ceil(totalProducts / PRODUCTS_PER_PAGE));
   const firstProductIndex = (currentPage - 1) * PRODUCTS_PER_PAGE;
-  const paginatedProducts = filteredProducts.slice(firstProductIndex, firstProductIndex + PRODUCTS_PER_PAGE);
-  const visibleStart = filteredProducts.length ? firstProductIndex + 1 : 0;
-  const visibleEnd = Math.min(firstProductIndex + PRODUCTS_PER_PAGE, filteredProducts.length);
+  const visibleStart = totalProducts ? firstProductIndex + 1 : 0;
+  const visibleEnd = Math.min(firstProductIndex + paginatedProducts.length, totalProducts);
   const paginationItems = useMemo(() => getPaginationItems(currentPage, totalPages), [currentPage, totalPages]);
   const mobilePaginationItems = useMemo(() => getMobilePaginationItems(currentPage, totalPages), [currentPage, totalPages]);
 
@@ -161,6 +117,7 @@ export function CatalogPage() {
   }, [totalPages]);
 
   function changeCategory(value: ProductCategory | 'todos') {
+    setCurrentPage(1);
     const nextParams = new URLSearchParams(searchParams);
     if (value === 'todos') {
       nextParams.delete('categoria');
@@ -174,6 +131,7 @@ export function CatalogPage() {
   }
 
   function changeSubcategory(value: ProductSubcategory | 'todas') {
+    setCurrentPage(1);
     const nextParams = new URLSearchParams(searchParams);
     nextParams.set('categoria', 'presentes');
     if (value === 'todas') {
@@ -216,11 +174,20 @@ export function CatalogPage() {
         </div>
 
         <div className="grid gap-3 bg-cream/75 p-4 dark:bg-[#1f130e] sm:gap-4 sm:p-5 md:border-t md:border-coffee/8 md:dark:border-white/14 lg:grid-cols-[1fr_auto]">
-          <SearchBar value={query} onChange={setQuery} />
+          <SearchBar
+            value={query}
+            onChange={(value) => {
+              setQuery(value);
+              setCurrentPage(1);
+            }}
+          />
           <Select
             value={sort}
             options={sortOptions}
-            onChange={setSort}
+            onChange={(value) => {
+              setSort(value);
+              setCurrentPage(1);
+            }}
             ariaLabel="Ordenar produtos"
             icon={<ArrowDownAZ size={17} />}
             className="bg-white/90"
@@ -237,7 +204,7 @@ export function CatalogPage() {
                   : 'border-coffee/10 bg-white text-coffee/70 hover:border-caramel/40 hover:text-coffee dark:border-white/14 dark:bg-[#2a1a13] dark:text-cream/75'
               }`}
             >
-              Todas ({productsMatchingSearch.length})
+              Todas
             </button>
             {productCategories.map((categoryItem) => (
               <button
@@ -251,7 +218,7 @@ export function CatalogPage() {
                     : 'border-coffee/10 bg-white text-coffee/70 hover:border-caramel/40 hover:text-coffee dark:border-white/14 dark:bg-[#2a1a13] dark:text-cream/75'
                 }`}
               >
-                {categoryItem.shortName} ({categoryCounts[categoryItem.id]})
+                {categoryItem.shortName}
               </button>
             ))}
           </div>
@@ -268,7 +235,7 @@ export function CatalogPage() {
                     : 'bg-white text-coffee/68 ring-1 ring-coffee/10 hover:text-coffee dark:bg-[#2a1a13] dark:text-cream/72 dark:ring-white/14'
                 }`}
               >
-                Todas ({categoryCounts.presentes})
+                Todas
               </button>
               {giftSubcategories.map((subcategoryItem) => (
                 <button
@@ -282,7 +249,7 @@ export function CatalogPage() {
                       : 'bg-white text-coffee/68 ring-1 ring-coffee/10 hover:text-coffee dark:bg-[#2a1a13] dark:text-cream/72 dark:ring-white/14'
                   }`}
                 >
-                  {subcategoryItem.name} ({subcategoryCounts[subcategoryItem.id]})
+                  {subcategoryItem.name}
                 </button>
               ))}
             </div>
@@ -292,8 +259,8 @@ export function CatalogPage() {
 
       <div id="catalog-results" className="mt-5 sm:mt-8">
         <p className="text-sm font-semibold text-coffee/72 dark:text-cream/78">
-          {filteredProducts.length} produto(s) encontrados
-          {filteredProducts.length > 0 && (
+          {totalProducts} produto(s) encontrados
+          {totalProducts > 0 && (
             <span className="ml-2 text-coffee/55 dark:text-cream/60">
               Exibindo {visibleStart}-{visibleEnd}
             </span>
@@ -316,8 +283,8 @@ export function CatalogPage() {
       )}
 
       {loading ? (
-        <Loading label="Carregando catalogo..." variant="catalog" />
-      ) : filteredProducts.length > 0 ? (
+        <CatalogSkeleton />
+      ) : totalProducts > 0 ? (
         <>
           <div className="mt-3 grid items-stretch gap-4 sm:mt-6 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
             {paginatedProducts.map((product) => (
@@ -329,7 +296,7 @@ export function CatalogPage() {
             <div className="flex items-center justify-between gap-3 sm:block">
               <p className="text-xs font-extrabold uppercase tracking-[0.16em] text-caramel dark:text-gold">Pagina {currentPage} de {totalPages}</p>
               <p className="text-sm font-semibold text-coffee/68 dark:text-cream/72">
-                {visibleStart}-{visibleEnd} de {filteredProducts.length} produtos
+                {visibleStart}-{visibleEnd} de {totalProducts} produtos
               </p>
             </div>
 

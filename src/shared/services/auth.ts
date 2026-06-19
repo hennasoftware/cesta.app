@@ -1,5 +1,5 @@
 import { signInWithEmailAndPassword, signOut } from 'firebase/auth';
-import { auth } from './firebase';
+import { auth } from './firebase-auth';
 
 export async function loginAdmin(email: string, password: string) {
   if (!auth) {

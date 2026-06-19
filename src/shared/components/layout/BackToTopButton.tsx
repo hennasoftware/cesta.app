@@ -1,9 +1,11 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowUp } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 
 export function BackToTopButton() {
   const [isVisible, setIsVisible] = useState(false);
+  const location = useLocation();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -15,6 +17,8 @@ export function BackToTopButton() {
 
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  if (location.pathname.startsWith('/admin')) return null;
 
   return (
     <AnimatePresence>

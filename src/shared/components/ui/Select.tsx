@@ -15,6 +15,9 @@ type SelectProps<Value extends string> = {
   icon?: ReactNode;
   className?: string;
   preserveOrder?: boolean;
+  invalid?: boolean;
+  ariaDescribedBy?: string;
+  required?: boolean;
 };
 
 function sortOptions<Value extends string>(options: Array<SelectOption<Value>>) {
@@ -102,6 +105,9 @@ export function Select<Value extends string>({
   icon,
   className = '',
   preserveOrder = false,
+  invalid = false,
+  ariaDescribedBy,
+  required = false,
 }: SelectProps<Value>) {
   const sortedOptions = preserveOrder ? options : sortOptions(options);
   const selectedOption = sortedOptions.find((option) => option.value === value) ?? null;
@@ -111,10 +117,13 @@ export function Select<Value extends string>({
   }
 
   return (
-    <label className={`flex h-12 min-w-0 items-center gap-2 rounded-full border border-coffee/10 bg-white px-4 text-sm text-coffee shadow-sm backdrop-blur dark:border-white/15 dark:bg-cream dark:text-espresso sm:min-w-44 ${className}`}>
+    <label className={`flex h-12 min-w-0 items-center gap-2 rounded-full border border-coffee/10 bg-white px-4 text-sm text-coffee shadow-sm backdrop-blur dark:border-white/15 dark:bg-cream dark:text-espresso sm:min-w-44 ${invalid ? 'border-red-400 ring-2 ring-red-200 dark:border-red-400 dark:ring-red-500/25' : ''} ${className}`}>
       {icon && <span className="shrink-0 text-caramel">{icon}</span>}
       <ReactSelect
         aria-label={ariaLabel}
+        aria-invalid={invalid || undefined}
+        aria-describedby={ariaDescribedBy}
+        aria-required={required}
         className="min-w-0 flex-1"
         value={selectedOption}
         options={sortedOptions}

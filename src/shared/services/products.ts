@@ -3,16 +3,38 @@ import {
   collection,
   deleteDoc,
   doc,
+  getCountFromServer,
+  getDocs,
+  limit,
   onSnapshot,
+  orderBy,
+  query,
   serverTimestamp,
+  startAfter,
   updateDoc,
+  where,
   type DocumentData,
+  type QueryConstraint,
   type QueryDocumentSnapshot,
   type Timestamp,
 } from 'firebase/firestore';
 import { db } from './firebase';
 import { normalizeProductClassification } from '../config/categories';
 import type { Product, ProductCategory, ProductSubcategory } from '../types/product';
+
+export type CatalogSort = 'featured' | 'price-asc' | 'price-desc' | 'name';
+
+export type CatalogFilters = {
+  category: ProductCategory | 'todos';
+  subcategory: ProductSubcategory | 'todas';
+  sort: CatalogSort;
+  pageSize: number;
+};
+
+export type CatalogPageResult = {
+  products: Product[];
+  lastDocument: QueryDocumentSnapshot<DocumentData> | null;
+};
 
 export type ProductFormValues = {
   name: string;
@@ -24,6 +46,9 @@ export type ProductFormValues = {
   images: string[];
   includedItems: string[];
   available: boolean;
+  featured: boolean;
+  featuredOrder: number;
+  tag: string;
 };
 
 function slugify(value: string) {
@@ -57,9 +82,10 @@ function mapProduct(snapshot: QueryDocumentSnapshot<DocumentData>): Product {
     price: Number(data.price || 0),
     category: classification.category,
     subcategory: classification.subcategory,
-    tag: data.tag || (data.available === false ? 'Indisponivel' : 'Disponivel'),
+    tag: data.tag || '',
     featured: Boolean(data.featured),
-    rating: Number(data.rating || 5),
+    featuredOrder: Number(data.featuredOrder || 999),
+    rating: data.rating ? Number(data.rating) : undefined,
     photo,
     available: data.available !== false,
     createdAt: toDate(data.createdAt),
@@ -89,6 +115,146 @@ export function subscribeProducts(onChange: (products: Product[]) => void, onErr
   );
 }
 
+function publicFilterConstraints(filters: Pick<CatalogFilters, 'category' | 'subcategory'>): QueryConstraint[] {
+  const constraints: QueryConstraint[] = [where('available', '==', true)];
+
+  if (filters.category !== 'todos') {
+    constraints.push(where('category', '==', filters.category));
+  }
+  if (filters.category === 'presentes' && filters.subcategory !== 'todas') {
+    constraints.push(where('subcategory', '==', filters.subcategory));
+  }
+
+  return constraints;
+}
+
+function catalogOrderConstraint(sort: CatalogSort) {
+  if (sort === 'price-asc') return orderBy('price', 'asc');
+  if (sort === 'price-desc') return orderBy('price', 'desc');
+  if (sort === 'featured') return orderBy('featured', 'desc');
+  return orderBy('name', 'asc');
+}
+
+export async function getFeaturedProducts(maxProducts = 3) {
+  const database = requireDb();
+  try {
+    const featuredSnapshot = await getDocs(
+      query(
+        collection(database, 'products'),
+        where('available', '==', true),
+        where('featured', '==', true),
+        orderBy('featuredOrder', 'asc'),
+        limit(maxProducts),
+      ),
+    );
+    return featuredSnapshot.docs.map(mapProduct);
+  } catch (error) {
+    if (!isMissingIndexError(error)) throw error;
+    const featuredSnapshot = await getDocs(
+      query(collection(database, 'products'), where('featured', '==', true)),
+    );
+    return featuredSnapshot.docs
+      .map(mapProduct)
+      .filter((product) => product.available !== false)
+      .sort(compareFeaturedProducts)
+      .slice(0, maxProducts);
+  }
+}
+
+export async function getProductBySlug(slug: string) {
+  const database = requireDb();
+  const snapshot = await getDocs(query(collection(database, 'products'), where('slug', '==', slug), limit(1)));
+  const product = snapshot.docs[0] ? mapProduct(snapshot.docs[0]) : null;
+  return product?.available === false ? null : product;
+}
+
+export async function getRelatedProducts(product: Product, maxProducts = 3) {
+  const database = requireDb();
+  const snapshot = await getDocs(
+    query(collection(database, 'products'), where('category', '==', product.category), limit(maxProducts + 2)),
+  );
+
+  return snapshot.docs
+    .map(mapProduct)
+    .filter((item) => item.id !== product.id && item.available !== false)
+    .sort((a, b) => Number(b.subcategory === product.subcategory) - Number(a.subcategory === product.subcategory))
+    .slice(0, maxProducts);
+}
+
+export async function getCatalogProductCount(filters: Pick<CatalogFilters, 'category' | 'subcategory'>) {
+  const database = requireDb();
+  const snapshot = await getCountFromServer(
+    query(collection(database, 'products'), ...publicFilterConstraints(filters)),
+  );
+  return snapshot.data().count;
+}
+
+export async function getCatalogProductPage(
+  filters: CatalogFilters,
+  cursor?: QueryDocumentSnapshot<DocumentData> | null,
+): Promise<CatalogPageResult> {
+  const database = requireDb();
+  const constraints: QueryConstraint[] = [
+    ...publicFilterConstraints(filters),
+    catalogOrderConstraint(filters.sort),
+  ];
+  if (cursor) constraints.push(startAfter(cursor));
+  constraints.push(limit(filters.pageSize));
+
+  const snapshot = await getDocs(query(collection(database, 'products'), ...constraints));
+  return {
+    products: snapshot.docs.map(mapProduct),
+    lastDocument: snapshot.docs.length ? snapshot.docs[snapshot.docs.length - 1] : null,
+  };
+}
+
+export async function searchCatalogProducts(filters: Pick<CatalogFilters, 'category' | 'subcategory'>) {
+  const database = requireDb();
+  const snapshot = await getDocs(
+    query(collection(database, 'products'), ...publicFilterConstraints(filters)),
+  );
+  return snapshot.docs.map(mapProduct);
+}
+
+export async function getCatalogProductsWithoutCompositeIndex(filters: CatalogFilters) {
+  const database = requireDb();
+  const snapshot = await getDocs(collection(database, 'products'));
+  const products = snapshot.docs
+    .map(mapProduct)
+    .filter((product) => {
+      const matchesAvailability = product.available !== false;
+      const matchesCategory = filters.category === 'todos' || product.category === filters.category;
+      const matchesSubcategory =
+        filters.category !== 'presentes' ||
+        filters.subcategory === 'todas' ||
+        product.subcategory === filters.subcategory;
+      return matchesAvailability && matchesCategory && matchesSubcategory;
+    });
+
+  return sortCatalogProducts(products, filters.sort);
+}
+
+function sortCatalogProducts(products: Product[], sort: CatalogSort) {
+  return [...products].sort((a, b) => {
+    if (sort === 'price-asc') return a.price - b.price;
+    if (sort === 'price-desc') return b.price - a.price;
+    if (sort === 'name') return a.name.localeCompare(b.name);
+    return compareFeaturedProducts(a, b);
+  });
+}
+
+function compareFeaturedProducts(a: Product, b: Product) {
+  const featuredDifference = Number(b.featured) - Number(a.featured);
+  if (featuredDifference) return featuredDifference;
+  const orderDifference = (a.featuredOrder ?? 999) - (b.featuredOrder ?? 999);
+  return orderDifference || a.name.localeCompare(b.name);
+}
+
+function isMissingIndexError(error: unknown) {
+  if (!(error instanceof Error)) return false;
+  return error.message.includes('requires an index') || error.message.includes('create_composite');
+}
+
 export async function createProduct(values: ProductFormValues) {
   const database = requireDb();
   const slug = slugify(values.name);
@@ -100,9 +266,9 @@ export async function createProduct(values: ProductFormValues) {
     photo: images[0],
     slug,
     longDescription: values.description,
-    tag: values.available ? 'Disponivel' : 'Indisponivel',
-    featured: false,
-    rating: 5,
+    tag: values.tag.trim(),
+    featured: values.featured,
+    featuredOrder: values.featured ? Math.max(1, values.featuredOrder || 1) : 999,
     images,
     includedItems: values.includedItems.filter(Boolean),
     createdAt: serverTimestamp(),
@@ -121,9 +287,19 @@ export async function updateProduct(productId: string, values: ProductFormValues
     photo: images[0],
     slug,
     longDescription: values.description,
-    tag: values.available ? 'Disponivel' : 'Indisponivel',
+    tag: values.tag.trim(),
+    featured: values.featured,
+    featuredOrder: values.featured ? Math.max(1, values.featuredOrder || 1) : 999,
     images,
     includedItems: values.includedItems.filter(Boolean),
+    updatedAt: serverTimestamp(),
+  });
+}
+
+export async function updateProductAvailability(productId: string, available: boolean) {
+  const database = requireDb();
+  await updateDoc(doc(database, 'products', productId), {
+    available,
     updatedAt: serverTimestamp(),
   });
 }

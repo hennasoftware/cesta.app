@@ -8,7 +8,9 @@ export default defineConfig({
       output: {
         manualChunks(id) {
           if (!id.includes('node_modules')) return undefined;
-          if (id.includes('firebase')) return 'firebase';
+          if (id.includes('@firebase/auth') || id.includes('firebase/auth')) return 'firebase-auth';
+          if (id.includes('@firebase/firestore') || id.includes('firebase/firestore')) return 'firebase-firestore';
+          if (id.includes('@firebase/') || id.includes('node_modules/firebase/')) return 'firebase-core';
           if (id.includes('framer-motion')) return 'motion';
           if (id.includes('lucide-react')) return 'icons';
           if (id.includes('@radix-ui')) return 'radix';

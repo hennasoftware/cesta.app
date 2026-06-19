@@ -15,17 +15,17 @@ import {
   Truck,
   X,
 } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, Navigate, useParams } from 'react-router-dom';
 import { ProductCard } from '../../../shared/components/cards/ProductCard';
 import { Seo } from '../../../shared/components/Seo';
 import { WhatsAppButton } from '../../../shared/components/WhatsAppButton';
 import { Badge } from '../../../shared/components/ui/Badge';
 import { ButtonLink } from '../../../shared/components/ui/Button';
-import { Loading } from '../../../shared/components/ui/Loading';
+import { ProductDetailsSkeleton } from '../../../shared/components/ui/Skeletons';
 import { SectionTitle } from '../../../shared/components/ui/SectionTitle';
 import { getCategoryName, getSubcategoryName } from '../../../shared/config/categories';
-import { useProducts } from '../../../shared/hooks/useProducts';
+import { useProductDetails } from '../../../shared/hooks/useProducts';
 import { testimonials } from '../../../shared/mocks/products';
 import { formatCurrency, productOrderMessage } from '../../../shared/services/whatsapp';
 
@@ -54,8 +54,7 @@ const experienceBlocks = [
 
 export function ProductDetailsPage() {
   const { slug } = useParams();
-  const { products, loading } = useProducts({ fallbackToMocks: false });
-  const product = products.find((item) => item.slug === slug);
+  const { product, relatedProducts, loading } = useProductDetails(slug);
   const [activeImage, setActiveImage] = useState(0);
   const [isImageViewerOpen, setIsImageViewerOpen] = useState(false);
   const images = product?.images?.length ? product.images : product?.photo ? [product.photo] : [];
@@ -94,16 +93,8 @@ export function ProductDetailsPage() {
     };
   }, [images.length, isImageViewerOpen]);
 
-  const relatedProducts = useMemo(() => {
-    if (!product) return [];
-    return products
-      .filter((item) => item.category === product.category && item.id !== product.id)
-      .sort((a, b) => Number(b.subcategory === product.subcategory) - Number(a.subcategory === product.subcategory))
-      .slice(0, 3);
-  }, [product, products]);
-
   if (loading) {
-    return <Loading label="Carregando produto..." variant="product" />;
+    return <ProductDetailsSkeleton />;
   }
 
   if (!product) {
@@ -208,15 +199,16 @@ export function ProductDetailsPage() {
                 src={images[activeImage]}
                 alt={product.name}
                 className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.02]"
+                decoding="async"
+                {...{ fetchpriority: 'high' }}
               />
-              <div className="absolute inset-x-0 top-0 flex items-start justify-between gap-3 p-3 sm:p-4">
-                <span className="rounded-full border border-white/70 bg-white/95 px-3 py-1.5 text-[11px] font-extrabold text-espresso shadow-sm backdrop-blur">
-                  {product.tag}
-                </span>
-                <span className="flex items-center gap-1 rounded-full border border-white/70 bg-white/95 px-3 py-1.5 text-xs font-extrabold text-coffee shadow-sm backdrop-blur">
-                  <Star size={13} fill="currentColor" className="text-gold" /> {product.rating.toFixed(1)}
-                </span>
-              </div>
+              {product.tag && (
+                <div className="absolute inset-x-0 top-0 flex items-start p-3 sm:p-4">
+                  <span className="rounded-full border border-white/70 bg-white/95 px-3 py-1.5 text-[11px] font-extrabold text-espresso shadow-sm backdrop-blur">
+                    {product.tag}
+                  </span>
+                </div>
+              )}
               <span className="absolute bottom-3 right-3 grid h-10 w-10 place-items-center rounded-full border border-white/60 bg-black/45 text-white shadow-sm backdrop-blur transition group-hover:bg-white group-hover:text-espresso sm:bottom-4 sm:right-4">
                 <Maximize2 size={18} />
               </span>
@@ -238,7 +230,7 @@ export function ProductDetailsPage() {
                 aria-label={`Ver imagem ${index + 1}`}
                 aria-pressed={activeImage === index}
               >
-                <img src={image} alt="" className="h-full w-full rounded-[3px] object-cover" />
+                <img src={image} alt="" className="h-full w-full rounded-[3px] object-cover" loading="lazy" decoding="async" />
               </button>
               ))}
             </div>
@@ -391,7 +383,7 @@ export function ProductDetailsPage() {
           }
         />
         <div className="grid gap-6 md:grid-cols-3">
-          {(relatedProducts.length ? relatedProducts : products.filter((item) => item.id !== product.id).slice(0, 3)).map((item) => (
+          {relatedProducts.map((item) => (
             <ProductCard key={item.id} product={item} />
           ))}
         </div>

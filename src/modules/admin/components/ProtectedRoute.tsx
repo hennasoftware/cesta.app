@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { Loading } from '../../../shared/components/ui/Loading';
+import { AuthSkeleton } from '../../../shared/components/ui/Skeletons';
 import { useAuth } from '../context/AuthContext';
 
 export function ProtectedRoute({ children }: { children: ReactNode }) {
@@ -8,7 +8,7 @@ export function ProtectedRoute({ children }: { children: ReactNode }) {
   const location = useLocation();
 
   if (loading) {
-    return <Loading label="Verificando acesso..." variant="auth" />;
+    return <AuthSkeleton />;
   }
 
   if (!user) {

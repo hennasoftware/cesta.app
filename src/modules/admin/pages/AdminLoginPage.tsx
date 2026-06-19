@@ -5,7 +5,7 @@ import { BrandLogo } from '../../../shared/components/BrandLogo';
 import { Seo } from '../../../shared/components/Seo';
 import { Button } from '../../../shared/components/ui/Button';
 import { Input } from '../../../shared/components/ui/Input';
-import { isFirebaseConfigured } from '../../../shared/services/firebase';
+import { isFirebaseConfigured } from '../../../shared/services/firebase-auth';
 import { loginAdmin } from '../../../shared/services/auth';
 import { useAuth } from '../context/AuthContext';
 
@@ -42,7 +42,7 @@ export function AdminLoginPage() {
   }
 
   return (
-    <div className="mx-auto flex min-h-[70vh] max-w-7xl items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
+    <div className="flex min-h-screen items-center justify-center bg-[#f8f2ea] px-4 py-12 dark:bg-[#170c09] sm:px-6 lg:px-8">
       <Seo title="Admin | Cesta.com" description="Acesso administrativo da Cesta.com." />
       <form onSubmit={handleSubmit} className="w-full max-w-md rounded-[2rem] border border-white/70 bg-white p-6 shadow-premium dark:border-white/14 dark:bg-[#24150f]">
         <div className="mx-auto grid h-28 w-32 place-items-center overflow-hidden">

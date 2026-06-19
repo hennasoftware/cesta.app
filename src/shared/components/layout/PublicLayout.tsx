@@ -5,7 +5,7 @@ import { BackToTopButton } from './BackToTopButton';
 import { MobileBottomNav } from './MobileBottomNav';
 import { ScrollManager } from './ScrollManager';
 
-export function AppLayout({ children }: { children: ReactNode }) {
+export function PublicLayout({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen bg-soft-radial dark:bg-none dark:bg-espresso">
       <ScrollManager />

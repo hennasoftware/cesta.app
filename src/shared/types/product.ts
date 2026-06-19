@@ -18,7 +18,8 @@ export type Product = {
   subcategory?: ProductSubcategory | null;
   tag: string;
   featured?: boolean;
-  rating: number;
+  featuredOrder?: number;
+  rating?: number;
   images: string[];
   photo?: string;
   available?: boolean;

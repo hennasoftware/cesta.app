@@ -1,6 +1,6 @@
 import { onAuthStateChanged, type User } from 'firebase/auth';
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
-import { auth } from '../../../shared/services/firebase';
+import { auth } from '../../../shared/services/firebase-auth';
 
 type AuthContextValue = {
   user: User | null;

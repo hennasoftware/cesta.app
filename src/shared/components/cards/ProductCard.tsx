@@ -1,4 +1,4 @@
-import { ArrowUpRight, Gift, Sparkles, Star, Truck } from 'lucide-react';
+import { ArrowUpRight, Gift, Sparkles, Truck } from 'lucide-react';
 import { memo } from 'react';
 import { Link } from 'react-router-dom';
 import type { Product } from '../../types/product';
@@ -21,14 +21,13 @@ function ProductCardComponent({ product }: ProductCardProps) {
             loading="lazy"
             decoding="async"
           />
-          <div className="absolute inset-x-0 top-0 flex items-start justify-between gap-3 p-3">
-            <span className="inline-flex items-center rounded-full border border-white/70 bg-white/95 px-3 py-1.5 text-[11px] font-extrabold text-espresso shadow-[0_8px_24px_rgba(36,21,15,0.18)] backdrop-blur">
-              {product.tag}
-            </span>
-            <span className="flex shrink-0 items-center gap-1 rounded-full border border-white/60 bg-white/95 px-2.5 py-1.5 text-xs font-extrabold text-coffee shadow-[0_8px_24px_rgba(36,21,15,0.18)] backdrop-blur">
-              <Star size={12} fill="currentColor" className="text-gold" /> {product.rating.toFixed(1)}
-            </span>
-          </div>
+          {product.tag && (
+            <div className="absolute inset-x-0 top-0 flex items-start p-3">
+              <span className="inline-flex items-center rounded-full border border-white/70 bg-white/95 px-3 py-1.5 text-[11px] font-extrabold text-espresso shadow-[0_8px_24px_rgba(36,21,15,0.18)] backdrop-blur">
+                {product.tag}
+              </span>
+            </div>
+          )}
         </div>
       </Link>
 

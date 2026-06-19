@@ -6,8 +6,9 @@ import { Seo } from '../../../shared/components/Seo';
 import { Badge } from '../../../shared/components/ui/Badge';
 import { Button, ButtonLink } from '../../../shared/components/ui/Button';
 import { SectionTitle } from '../../../shared/components/ui/SectionTitle';
+import { FeaturedProductsSkeleton } from '../../../shared/components/ui/Skeletons';
 import { WhatsAppButton } from '../../../shared/components/WhatsAppButton';
-import { useProducts } from '../../../shared/hooks/useProducts';
+import { useFeaturedProducts } from '../../../shared/hooks/useProducts';
 import { testimonials } from '../../../shared/mocks/products';
 import { customOrderMessage } from '../../../shared/services/whatsapp';
 import { brand } from '../../../shared/config/brand';
@@ -40,23 +41,24 @@ const heroButtonBase =
 
 export function HomePage() {
   const [isOrderGuideOpen, setIsOrderGuideOpen] = useState(false);
-  const { products } = useProducts({ fallbackToMocks: false });
-  const featuredProducts = (products.some((product) => product.featured) ? products.filter((product) => product.featured) : products).slice(0, 3);
+  const { products: featuredProducts, loading } = useFeaturedProducts();
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
       <Seo title={`${brand.name} | ${brand.tagline}`} description="Cestas de cafe da manha, presentes personalizados e kits afetivos com entrega local e atendimento pelo WhatsApp." />
       <OrderGuideModal open={isOrderGuideOpen} onClose={() => setIsOrderGuideOpen(false)} />
       <section className="relative overflow-hidden bg-espresso sm:min-h-[calc(100vh-5rem)]">
-        <div className="relative left-1/2 h-[calc(100svh-5rem)] min-h-[620px] w-screen -translate-x-1/2 overflow-hidden bg-espresso shadow-glow sm:hidden">
-          <img className="h-full w-full object-cover object-center" src={mobileHeroImage} alt="Cesta.com, WhatsApp (12) 3126-3230 e Instagram @cesta.com_" />
-        </div>
-        <div className="absolute inset-0 hidden sm:block">
-          <img
-            className="h-full w-full object-cover object-center"
-            src={heroImage}
-            alt="Cesta premium Cesta.com"
-          />
+        <div className="relative left-1/2 h-[calc(100svh-5rem)] min-h-[620px] w-screen -translate-x-1/2 overflow-hidden bg-espresso shadow-glow sm:absolute sm:inset-0 sm:left-0 sm:h-auto sm:min-h-0 sm:w-full sm:translate-x-0">
+          <picture className="block h-full w-full">
+            <source media="(min-width: 640px)" srcSet={heroImage} />
+            <img
+              className="h-full w-full object-cover object-center"
+              src={mobileHeroImage}
+              alt="Cesta.com, WhatsApp (12) 3126-3230 e Instagram @cesta.com_"
+              decoding="async"
+              {...{ fetchpriority: 'high' }}
+            />
+          </picture>
         </div>
         <div className="absolute inset-0 hidden bg-gradient-to-r from-espresso/90 via-coffee/68 to-coffee/18 sm:block" />
         <div className="absolute inset-x-0 bottom-0 hidden h-36 bg-gradient-to-t from-cream to-transparent dark:from-espresso sm:block" />
@@ -175,11 +177,25 @@ export function HomePage() {
 
       <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
         <SectionTitle eyebrow="Destaques" title="Cestas com alto apelo de presente" />
-        <div className="grid gap-4 sm:gap-6 md:grid-cols-3">
-          {featuredProducts.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
+        {loading ? (
+          <FeaturedProductsSkeleton />
+        ) : featuredProducts.length === 0 ? (
+          <div className="rounded-[2rem] border border-coffee/8 bg-white/70 px-6 py-8 text-center dark:border-white/14 dark:bg-[#24150f]">
+            <p className="text-lg font-extrabold text-coffee dark:text-cream">Novidades em preparação</p>
+            <p className="mt-2 text-sm leading-6 text-coffee/65 dark:text-cream/70">
+              Explore o catálogo completo enquanto selecionamos os próximos destaques.
+            </p>
+            <ButtonLink to="/catalogo" variant="secondary" className="mt-5">
+              Ver catálogo
+            </ButtonLink>
+          </div>
+        ) : (
+          <div className="grid gap-4 sm:gap-6 md:grid-cols-3">
+            {featuredProducts.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        )}
       </section>
 
       <section className="bg-espresso py-16 text-cream">

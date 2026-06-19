@@ -10,6 +10,8 @@ type ProductListProps = {
   products: Product[];
   onEdit: (product: Product) => void;
   onDelete: (product: Product) => void;
+  onAvailabilityChange: (product: Product, available: boolean) => void;
+  updatingProductId: string | null;
 };
 
 type StatusFilter = 'todos' | 'ativos' | 'inativos';
@@ -27,7 +29,7 @@ const sortOptions: Array<SelectOption<SortFilter>> = [
   { value: 'preco', label: 'Maior preco' },
 ];
 
-export function ProductList({ products, onEdit, onDelete }: ProductListProps) {
+export function ProductList({ products, onEdit, onDelete, onAvailabilityChange, updatingProductId }: ProductListProps) {
   const [query, setQuery] = useState('');
   const [status, setStatus] = useState<StatusFilter>('todos');
   const [sort, setSort] = useState<SortFilter>('recentes');
@@ -77,7 +79,14 @@ export function ProductList({ products, onEdit, onDelete }: ProductListProps) {
       {filteredProducts.length ? (
         <div className="grid gap-4">
           {filteredProducts.map((product) => (
-            <ProductCard key={product.id} product={product} onEdit={onEdit} onDelete={onDelete} />
+            <ProductCard
+              key={product.id}
+              product={product}
+              onEdit={onEdit}
+              onDelete={onDelete}
+              onAvailabilityChange={onAvailabilityChange}
+              updatingAvailability={updatingProductId === product.id}
+            />
           ))}
         </div>
       ) : (
