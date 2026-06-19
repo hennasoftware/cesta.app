@@ -247,18 +247,11 @@ export function ProductDetailsPage() {
 
         <div className="lg:sticky lg:top-24 lg:self-start">
           <div className="border-y border-coffee/10 py-5 dark:border-[#f26922]/20 sm:py-6 lg:border lg:bg-white lg:p-7 lg:shadow-[0_18px_50px_rgba(74,33,23,0.09)] lg:dark:bg-[#21120d] lg:dark:shadow-[0_18px_50px_rgba(0,0,0,0.32)]">
-            <div className="flex flex-wrap items-center gap-2">
-              <Badge tone="coffee">{categoryName}</Badge>
-              {subcategoryName && <Badge tone="rose">{subcategoryName}</Badge>}
-              <Badge tone="sage">Disponível</Badge>
-            </div>
-
-            <h1 className="mt-5 font-display text-3xl font-extrabold leading-tight text-coffee dark:text-white sm:text-4xl lg:text-[2.65rem]">
+            <h1 className="font-display text-3xl font-extrabold leading-tight text-coffee dark:text-white sm:text-4xl lg:text-[2.65rem]">
               {product.name}
             </h1>
-            <p className="mt-4 text-base leading-7 text-coffee/72 dark:text-[#f4d8c8]">{product.longDescription}</p>
 
-            <div className="mt-6 border-y border-coffee/8 py-5 dark:border-[#f26922]/18">
+            <div className="mt-5 border-y border-coffee/8 py-5 dark:border-[#f26922]/18">
               <p className="text-[11px] font-extrabold uppercase tracking-[0.16em] text-caramel dark:text-[#ff9b4a]">A partir de</p>
               <div className="mt-1 flex items-end justify-between gap-4">
                 <p className="text-3xl font-extrabold leading-none text-coffee dark:text-white sm:text-4xl">
@@ -272,6 +265,32 @@ export function ProductDetailsPage() {
               </div>
             </div>
 
+            {product.includedItems.length > 0 && (
+              <div className="mt-6">
+                <p className="text-xs font-extrabold uppercase tracking-[0.16em] text-caramel dark:text-[#ff9b4a]">Itens inclusos</p>
+                <div className="mt-3 grid gap-x-6 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+                  {product.includedItems.map((item, index) => (
+                    <div
+                      key={`${item}-${index}`}
+                      className="flex min-h-11 items-center gap-3 border-b border-coffee/8 py-2 text-sm font-bold text-coffee/76 dark:border-[#f26922]/14 dark:text-[#f4d8c8]"
+                    >
+                      <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-pistachio text-sage dark:bg-[#123b39] dark:text-[#64e3dd]">
+                        <Check size={14} strokeWidth={3} />
+                      </span>
+                      {item}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {product.longDescription && (
+              <div className="mt-6">
+                <p className="text-xs font-extrabold uppercase tracking-[0.16em] text-caramel dark:text-[#ff9b4a]">Descrição e observações</p>
+                <p className="mt-3 whitespace-pre-line text-base leading-7 text-coffee/72 dark:text-[#f4d8c8]">{product.longDescription}</p>
+              </div>
+            )}
+
             <WhatsAppButton
               message={productOrderMessage(product.name)}
               size="lg"
@@ -279,6 +298,12 @@ export function ProductDetailsPage() {
             >
               Pedir esta cesta
             </WhatsAppButton>
+
+            <div className="mt-5 flex flex-wrap items-center gap-2">
+              <Badge tone="coffee">{categoryName}</Badge>
+              {subcategoryName && <Badge tone="rose">{subcategoryName}</Badge>}
+              <Badge tone="sage">Disponível</Badge>
+            </div>
 
             <div className="mt-5 grid grid-cols-3 divide-x divide-coffee/8 border-t border-coffee/8 pt-5 dark:divide-[#f26922]/16 dark:border-[#f26922]/16">
               {[
@@ -292,28 +317,6 @@ export function ProductDetailsPage() {
                 </div>
               ))}
             </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="border-y border-coffee/8 bg-white/55 py-12 dark:border-[#f26922]/16 dark:bg-[#170d0a] sm:py-16">
-        <div className="mx-auto grid max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-[0.72fr_1.28fr] lg:px-8">
-          <div>
-            <p className="text-xs font-extrabold uppercase tracking-[0.16em] text-caramel">Composição</p>
-            <h2 className="mt-3 font-display text-3xl font-extrabold text-coffee dark:text-white">O que acompanha esta cesta</h2>
-            <p className="mt-4 text-sm leading-7 text-coffee/68 dark:text-[#d9b8a7]">
-              Uma seleção preparada para entregar presença, cuidado e uma experiência completa.
-            </p>
-          </div>
-          <div className="grid gap-x-8 gap-y-3 sm:grid-cols-2">
-            {product.includedItems.map((item) => (
-              <div key={item} className="flex min-h-12 items-center gap-3 border-b border-coffee/8 py-2 text-sm font-bold text-coffee/76 dark:border-[#f26922]/14 dark:text-[#f4d8c8]">
-                <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-pistachio text-sage dark:bg-[#123b39] dark:text-[#64e3dd]">
-                  <Check size={15} strokeWidth={3} />
-                </span>
-                {item}
-              </div>
-            ))}
           </div>
         </div>
       </section>

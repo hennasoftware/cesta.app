@@ -1,4 +1,4 @@
-import { CheckCircle2, ImagePlus, ListPlus, PackagePlus, Save, Star, Trash2, X, XCircle } from 'lucide-react';
+import { CheckCircle2, ImagePlus, PackagePlus, Save, Star, Trash2, X, XCircle } from 'lucide-react';
 import { FormEvent, useEffect, useState } from 'react';
 import { Button } from '../../../shared/components/ui/Button';
 import { Input } from '../../../shared/components/ui/Input';
@@ -22,7 +22,7 @@ const initialValues: ProductFormValues = {
   subcategory: null,
   photo: '',
   images: [],
-  includedItems: [''],
+  includedItems: [],
   available: true,
 };
 
@@ -38,6 +38,7 @@ const subcategoryOptions: Array<SelectOption<ProductSubcategory>> = giftSubcateg
 
 export function ProductForm({ product, onCancelEdit, onSaved }: ProductFormProps) {
   const [values, setValues] = useState<ProductFormValues>(initialValues);
+  const [includedItemsText, setIncludedItemsText] = useState('');
   const [error, setError] = useState('');
   const [processingImages, setProcessingImages] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -45,6 +46,7 @@ export function ProductForm({ product, onCancelEdit, onSaved }: ProductFormProps
   useEffect(() => {
     if (!product) {
       setValues(initialValues);
+      setIncludedItemsText('');
       setProcessingImages(false);
       return;
     }
@@ -59,9 +61,10 @@ export function ProductForm({ product, onCancelEdit, onSaved }: ProductFormProps
       subcategory: product.subcategory ?? null,
       photo: images[0] || '',
       images,
-      includedItems: product.includedItems.length ? product.includedItems : [''],
+      includedItems: product.includedItems,
       available: product.available !== false,
     });
+    setIncludedItemsText(product.includedItems.join('\n'));
     setProcessingImages(false);
   }, [product]);
 
@@ -84,30 +87,6 @@ export function ProductForm({ product, onCancelEdit, onSaved }: ProductFormProps
       images: normalizedImages,
       photo: normalizedImages[0] || '',
     }));
-  }
-
-  function updateIncludedItem(index: number, value: string) {
-    setValues((current) => ({
-      ...current,
-      includedItems: current.includedItems.map((item, itemIndex) => (itemIndex === index ? value : item)),
-    }));
-  }
-
-  function addIncludedItem() {
-    setValues((current) => ({
-      ...current,
-      includedItems: [...current.includedItems, ''],
-    }));
-  }
-
-  function removeIncludedItem(index: number) {
-    setValues((current) => {
-      const includedItems = current.includedItems.filter((_, itemIndex) => itemIndex !== index);
-      return {
-        ...current,
-        includedItems: includedItems.length ? includedItems : [''],
-      };
-    });
   }
 
   async function addImages(files: FileList | null) {
@@ -180,7 +159,11 @@ export function ProductForm({ product, onCancelEdit, onSaved }: ProductFormProps
         throw new Error('As fotos ultrapassaram o limite seguro do Firestore. Remova uma foto ou use imagens mais simples.');
       }
 
-      const payload = { ...values, images, photo: images[0] };
+      const includedItems = includedItemsText
+        .split(/\r?\n/)
+        .map((item) => item.replace(/^\s*(?:[-*•–—]|\d+[.)])\s*/, '').trim())
+        .filter(Boolean);
+      const payload = { ...values, images, photo: images[0], includedItems };
 
       if (product) {
         await updateProduct(product.id, payload);
@@ -191,6 +174,7 @@ export function ProductForm({ product, onCancelEdit, onSaved }: ProductFormProps
       }
 
       setValues(initialValues);
+      setIncludedItemsText('');
       setProcessingImages(false);
     } catch (submitError) {
       setError(submitError instanceof Error ? submitError.message : 'Nao foi possivel salvar o produto.');
@@ -225,31 +209,16 @@ export function ProductForm({ product, onCancelEdit, onSaved }: ProductFormProps
         </div>
 
         <div>
-          <div className="mb-2 flex items-center justify-between gap-3">
-            <span className="block text-sm font-bold text-coffee dark:text-cream">Itens inclusos</span>
-            <Button type="button" variant="ghost" size="sm" onClick={addIncludedItem}>
-              <ListPlus size={16} /> Adicionar
-            </Button>
-          </div>
-          <div className="grid gap-3">
-            {values.includedItems.map((item, index) => (
-              <div key={index} className="flex gap-2">
-                <Input
-                  value={item}
-                  onChange={(event) => updateIncludedItem(index, event.target.value)}
-                  placeholder="Ex: Cafe gourmet"
-                />
-                <button
-                  type="button"
-                  onClick={() => removeIncludedItem(index)}
-                  className="grid h-12 w-12 shrink-0 place-items-center rounded-full border border-red-100 bg-red-50 text-red-700 transition hover:bg-red-100"
-                  aria-label="Remover item incluso"
-                >
-                  <Trash2 size={17} />
-                </button>
-              </div>
-            ))}
-          </div>
+          <span className="mb-2 block text-sm font-bold text-coffee dark:text-cream">Itens da cesta</span>
+          <Textarea
+            value={includedItemsText}
+            onChange={(event) => setIncludedItemsText(event.target.value)}
+            placeholder={'Cole a lista inteira aqui, com um item por linha.\n\nEx:\n- Pão de queijo\n- Croissant\n- Cappuccino'}
+            className="min-h-44"
+          />
+          <p className="mt-2 text-xs font-semibold leading-5 text-coffee/60 dark:text-cream/60">
+            Use uma linha para cada item. Marcadores como hífen, bolinha ou numeração são removidos automaticamente ao salvar.
+          </p>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">

@@ -191,10 +191,10 @@ export function CatalogPage() {
   }
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="mx-auto max-w-7xl px-4 py-4 sm:px-6 sm:py-12 lg:px-8">
       <Seo title="Catalogo de cestas | Cesta.com" description="Veja cestas, kits afetivos e presentes personalizados para pedir pelo WhatsApp." />
-      <div className="overflow-hidden rounded-[2.5rem] border border-white/70 bg-white shadow-premium backdrop-blur dark:border-white/14 dark:bg-[#24150f]">
-        <div className="grid gap-6 p-6 md:p-10 lg:grid-cols-[1fr_0.45fr] lg:items-end">
+      <div className="overflow-hidden rounded-[1.75rem] border border-white/70 bg-white shadow-premium backdrop-blur dark:border-white/14 dark:bg-[#24150f] sm:rounded-[2.5rem]">
+        <div className="hidden gap-6 p-6 md:grid md:p-10 lg:grid-cols-[1fr_0.45fr] lg:items-end">
           <div className="space-y-8">
             <Badge tone="rose">Catálogo virtual</Badge>
             <SectionTitle
@@ -215,7 +215,7 @@ export function CatalogPage() {
           </div>
         </div>
 
-        <div className="grid gap-4 border-t border-coffee/8 bg-cream/75 p-5 dark:border-white/14 dark:bg-[#1f130e] lg:grid-cols-[1fr_auto]">
+        <div className="grid gap-3 bg-cream/75 p-4 dark:bg-[#1f130e] sm:gap-4 sm:p-5 md:border-t md:border-coffee/8 md:dark:border-white/14 lg:grid-cols-[1fr_auto]">
           <SearchBar value={query} onChange={setQuery} />
           <Select
             value={sort}
@@ -226,12 +226,12 @@ export function CatalogPage() {
             className="bg-white/90"
           />
 
-          <div className="flex flex-wrap gap-2 lg:col-span-2" aria-label="Filtros rápidos por categoria">
+          <div className="flex flex-nowrap gap-2 overflow-x-auto pb-1 sm:flex-wrap sm:overflow-visible sm:pb-0 lg:col-span-2" aria-label="Filtros rápidos por categoria">
             <button
               type="button"
               onClick={() => changeCategory('todos')}
               aria-pressed={category === 'todos'}
-              className={`h-10 rounded-full border px-4 text-sm font-extrabold transition ${
+              className={`h-10 shrink-0 rounded-full border px-4 text-sm font-extrabold transition ${
                 category === 'todos'
                   ? 'border-coffee bg-coffee text-cream shadow-sm dark:border-gold dark:bg-gold dark:text-espresso'
                   : 'border-coffee/10 bg-white text-coffee/70 hover:border-caramel/40 hover:text-coffee dark:border-white/14 dark:bg-[#2a1a13] dark:text-cream/75'
@@ -245,7 +245,7 @@ export function CatalogPage() {
                 type="button"
                 onClick={() => changeCategory(categoryItem.id)}
                 aria-pressed={category === categoryItem.id}
-                className={`h-10 rounded-full border px-4 text-sm font-extrabold transition ${
+                className={`h-10 shrink-0 rounded-full border px-4 text-sm font-extrabold transition ${
                   category === categoryItem.id
                     ? 'border-coffee bg-coffee text-cream shadow-sm dark:border-gold dark:bg-gold dark:text-espresso'
                     : 'border-coffee/10 bg-white text-coffee/70 hover:border-caramel/40 hover:text-coffee dark:border-white/14 dark:bg-[#2a1a13] dark:text-cream/75'
@@ -257,12 +257,12 @@ export function CatalogPage() {
           </div>
 
           {category === 'presentes' && (
-            <div className="flex flex-wrap gap-2 border-t border-coffee/8 pt-4 dark:border-white/10 lg:col-span-2" aria-label="Filtros por subcategoria">
+            <div className="flex flex-nowrap gap-2 overflow-x-auto border-t border-coffee/8 pt-3 dark:border-white/10 sm:flex-wrap sm:overflow-visible sm:pt-4 lg:col-span-2" aria-label="Filtros por subcategoria">
               <button
                 type="button"
                 onClick={() => changeSubcategory('todas')}
                 aria-pressed={subcategory === 'todas'}
-                className={`h-9 rounded-full px-3.5 text-xs font-extrabold transition ${
+                className={`h-9 shrink-0 rounded-full px-3.5 text-xs font-extrabold transition ${
                   subcategory === 'todas'
                     ? 'bg-caramel text-white shadow-sm'
                     : 'bg-white text-coffee/68 ring-1 ring-coffee/10 hover:text-coffee dark:bg-[#2a1a13] dark:text-cream/72 dark:ring-white/14'
@@ -276,7 +276,7 @@ export function CatalogPage() {
                   type="button"
                   onClick={() => changeSubcategory(subcategoryItem.id)}
                   aria-pressed={subcategory === subcategoryItem.id}
-                  className={`h-9 rounded-full px-3.5 text-xs font-extrabold transition ${
+                  className={`h-9 shrink-0 rounded-full px-3.5 text-xs font-extrabold transition ${
                     subcategory === subcategoryItem.id
                       ? 'bg-caramel text-white shadow-sm'
                       : 'bg-white text-coffee/68 ring-1 ring-coffee/10 hover:text-coffee dark:bg-[#2a1a13] dark:text-cream/72 dark:ring-white/14'
@@ -290,7 +290,7 @@ export function CatalogPage() {
         </div>
       </div>
 
-      <div id="catalog-results" className="mt-8">
+      <div id="catalog-results" className="mt-5 sm:mt-8">
         <p className="text-sm font-semibold text-coffee/72 dark:text-cream/78">
           {filteredProducts.length} produto(s) encontrados
           {filteredProducts.length > 0 && (
@@ -319,7 +319,7 @@ export function CatalogPage() {
         <Loading label="Carregando catalogo..." variant="catalog" />
       ) : filteredProducts.length > 0 ? (
         <>
-          <div className="mt-5 grid items-stretch gap-4 sm:mt-6 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
+          <div className="mt-3 grid items-stretch gap-4 sm:mt-6 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
             {paginatedProducts.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
