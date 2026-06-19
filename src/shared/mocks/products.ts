@@ -5,34 +5,22 @@ const img = (id: string) =>
 
 export const categories: Category[] = [
   {
-    id: 'cafe',
-    name: 'Cestas de Café',
+    id: 'cafe-da-manha',
+    name: 'Cesta de Café da Manhã',
     description: 'Manhãs especiais com sabores selecionados.',
     image: img('photo-1506368249639-73a05d6f6488'),
   },
   {
-    id: 'romanticas',
-    name: 'Cestas Românticas',
-    description: 'Gestos delicados para celebrar histórias.',
-    image: img('photo-1518199266791-5375a83190b7'),
-  },
-  {
-    id: 'personalizados',
-    name: 'Presentes Personalizados',
-    description: 'Detalhes únicos para quem importa.',
-    image: img('photo-1549465220-1a8b9238cd48'),
-  },
-  {
-    id: 'corporativos',
-    name: 'Kits Corporativos',
-    description: 'Experiências elegantes para equipes e clientes.',
+    id: 'vinho-e-frios',
+    name: 'Cesta de Vinho e Frios',
+    description: 'Sabores especiais para encontros e celebrações.',
     image: img('photo-1515169067865-5387ec356754'),
   },
   {
-    id: 'datas-especiais',
-    name: 'Datas Especiais',
-    description: 'Composições afetivas para momentos marcantes.',
-    image: img('photo-1512909006721-3d6018887383'),
+    id: 'presentes',
+    name: 'Cestas de Presentes',
+    description: 'Composições afetivas para cada ocasião.',
+    image: img('photo-1518199266791-5375a83190b7'),
   },
 ];
 
@@ -45,7 +33,8 @@ export const products: Product[] = [
     longDescription:
       'Uma experiência completa para transformar o começo do dia em um gesto memorável. Montada artesanalmente com produtos frescos, embalagem elegante e cartão personalizado.',
     price: 189.9,
-    category: 'cafe',
+    category: 'cafe-da-manha',
+    subcategory: null,
     tag: 'Mais pedido',
     featured: true,
     rating: 4.9,
@@ -64,7 +53,8 @@ export const products: Product[] = [
     longDescription:
       'Criada para surpreender com elegância. Combina flores delicadas, chocolates gourmet, bebida especial e acabamento premium para datas românticas.',
     price: 279.9,
-    category: 'romanticas',
+    category: 'presentes',
+    subcategory: 'romanticas',
     tag: 'Premium',
     featured: true,
     rating: 5,
@@ -83,7 +73,8 @@ export const products: Product[] = [
     longDescription:
       'Um box elegante para presentear com sabor e presença. Ideal para agradecimentos, aniversários e pequenas celebrações com acabamento refinado.',
     price: 149.9,
-    category: 'personalizados',
+    category: 'presentes',
+    subcategory: 'tematicas',
     tag: 'Novo',
     rating: 4.8,
     images: [
@@ -101,7 +92,8 @@ export const products: Product[] = [
     longDescription:
       'Uma composição generosa com clima de mesa posta. Une sabores clássicos, itens frescos e uma curadoria acolhedora para compartilhar.',
     price: 229.9,
-    category: 'cafe',
+    category: 'cafe-da-manha',
+    subcategory: null,
     tag: 'Família',
     rating: 4.9,
     images: [
@@ -119,7 +111,8 @@ export const products: Product[] = [
     longDescription:
       'Pensada para criar uma entrega especial e fotogênica. Mistura doces premium, bebida comemorativa e detalhes visuais que tornam o presente inesquecível.',
     price: 319.9,
-    category: 'datas-especiais',
+    category: 'presentes',
+    subcategory: 'aniversarios',
     tag: 'Luxo',
     featured: true,
     rating: 5,
@@ -138,7 +131,8 @@ export const products: Product[] = [
     longDescription:
       'Uma solução corporativa elegante para marcas que desejam demonstrar cuidado. Personalizável com identidade visual, cartão institucional e itens gourmet.',
     price: 199.9,
-    category: 'corporativos',
+    category: 'presentes',
+    subcategory: 'promocao-graduacao',
     tag: 'Empresas',
     rating: 4.7,
     images: [

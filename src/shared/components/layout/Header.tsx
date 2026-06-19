@@ -1,9 +1,10 @@
 import { AnimatePresence, motion } from 'framer-motion';
-import { Home, Info, Menu, Moon, Search, Sun, X } from 'lucide-react';
+import { ChevronDown, Home, Info, Menu, Moon, Search, Sun, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { BrandLogo } from '../BrandLogo';
 import { brand } from '../../config/brand';
+import { giftSubcategories, productCategories } from '../../config/categories';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { buildWhatsAppUrl, customOrderMessage } from '../../services/whatsapp';
 
@@ -12,6 +13,7 @@ const navItems = [
   { label: 'Catálogo', to: '/catalogo', icon: Search },
   { label: 'Como funciona', to: '/#como-funciona', icon: Info },
 ];
+const desktopNavItems = navItems.filter((item) => item.to !== '/catalogo');
 
 function BrandMark() {
   return (
@@ -73,11 +75,54 @@ export function Header() {
         </NavLink>
 
         <nav className="hidden items-center gap-1 md:flex">
-          {navItems.map((item) => (
+          {desktopNavItems.map((item) => (
             <Link key={item.to} to={item.to} className={desktopLinkClass(isItemActive(item.to))}>
               {item.label}
             </Link>
           ))}
+          <div className="group relative">
+            <Link
+              to="/catalogo"
+              className={`${desktopLinkClass(location.pathname === '/catalogo')} inline-flex items-center gap-1.5`}
+              aria-haspopup="menu"
+            >
+              Catálogo <ChevronDown size={15} />
+            </Link>
+            <div className="invisible absolute left-0 top-full z-50 w-72 translate-y-2 pt-3 opacity-0 transition group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100">
+              <div className="rounded-lg border border-coffee/10 bg-white p-2 shadow-premium dark:border-white/14 dark:bg-[#24150f]">
+                <Link
+                  to="/catalogo"
+                  className="mb-1 flex min-h-10 items-center rounded-md px-3 text-sm font-extrabold text-caramel transition hover:bg-cream dark:text-gold dark:hover:bg-white/10"
+                >
+                  Ver todo o catálogo
+                </Link>
+                <div className="mb-1 border-t border-coffee/8 dark:border-white/10" />
+                {productCategories.map((category) => (
+                  <div key={category.id}>
+                    <Link
+                      to={`/catalogo?categoria=${category.id}`}
+                      className="flex min-h-10 items-center rounded-md px-3 text-sm font-extrabold text-coffee transition hover:bg-cream dark:text-cream dark:hover:bg-white/10"
+                    >
+                      {category.name}
+                    </Link>
+                    {category.id === 'presentes' && (
+                      <div className="mb-2 ml-3 border-l border-coffee/10 pl-2 dark:border-white/14">
+                        {giftSubcategories.map((subcategory) => (
+                          <Link
+                            key={subcategory.id}
+                            to={`/catalogo?categoria=presentes&subcategoria=${subcategory.id}`}
+                            className="flex min-h-9 items-center rounded-md px-3 text-xs font-bold text-coffee/68 transition hover:bg-cream hover:text-coffee dark:text-cream/68 dark:hover:bg-white/10 dark:hover:text-cream"
+                          >
+                            {subcategory.name}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
         </nav>
 
         <div className="hidden items-center gap-3 md:flex">
@@ -151,6 +196,36 @@ export function Header() {
                     </motion.div>
                   );
                 })}
+                <div className="mt-2 border-t border-coffee/10 pt-3 dark:border-gold/15">
+                  <p className="px-2 text-xs font-extrabold uppercase tracking-[0.16em] text-caramel">Categorias</p>
+                  <div className="mt-2 grid gap-1">
+                    {productCategories.map((category) => (
+                      <div key={category.id}>
+                        <Link
+                          to={`/catalogo?categoria=${category.id}`}
+                          className="flex min-h-11 items-center rounded-xl px-3 text-sm font-extrabold text-coffee transition hover:bg-white dark:text-cream dark:hover:bg-white/10"
+                          onClick={() => setIsOpen(false)}
+                        >
+                          {category.name}
+                        </Link>
+                        {category.id === 'presentes' && (
+                          <div className="ml-4 border-l border-coffee/10 pl-2 dark:border-white/14">
+                            {giftSubcategories.map((subcategory) => (
+                              <Link
+                                key={subcategory.id}
+                                to={`/catalogo?categoria=presentes&subcategoria=${subcategory.id}`}
+                                className="flex min-h-9 items-center rounded-lg px-3 text-xs font-bold text-coffee/65 transition hover:bg-white hover:text-coffee dark:text-cream/65 dark:hover:bg-white/10 dark:hover:text-cream"
+                                onClick={() => setIsOpen(false)}
+                              >
+                                {subcategory.name}
+                              </Link>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
                 <div className="mt-3 grid grid-cols-2 gap-2">
                   <button
                     className={`${actionClass} bg-white text-espresso ring-1 ring-coffee/8 hover:bg-cream dark:bg-cream dark:text-espresso dark:ring-gold/15 dark:hover:bg-white`}

@@ -2,6 +2,7 @@ import { Search, SlidersHorizontal } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { EmptyState } from '../../../shared/components/ui/EmptyState';
 import { Select, type SelectOption } from '../../../shared/components/ui/Select';
+import { getCategoryName, getSubcategoryName } from '../../../shared/config/categories';
 import type { Product } from '../../../shared/types/product';
 import { ProductCard } from './ProductCard';
 
@@ -35,7 +36,17 @@ export function ProductList({ products, onEdit, onDelete }: ProductListProps) {
     const normalizedQuery = query.trim().toLowerCase();
     return products
       .filter((product) => {
-        const matchesSearch = [product.name, product.description, product.tag].join(' ').toLowerCase().includes(normalizedQuery);
+        const matchesSearch = [
+          product.name,
+          product.description,
+          product.tag,
+          getCategoryName(product.category),
+          getSubcategoryName(product.subcategory),
+        ]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase()
+          .includes(normalizedQuery);
         const matchesStatus =
           status === 'todos' ||
           (status === 'ativos' && product.available !== false) ||

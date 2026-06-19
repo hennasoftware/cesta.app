@@ -11,13 +11,15 @@ import {
   type Timestamp,
 } from 'firebase/firestore';
 import { db } from './firebase';
-import type { Product, ProductCategory } from '../types/product';
+import { normalizeProductClassification } from '../config/categories';
+import type { Product, ProductCategory, ProductSubcategory } from '../types/product';
 
 export type ProductFormValues = {
   name: string;
   description: string;
   price: number;
   category: ProductCategory;
+  subcategory: ProductSubcategory | null;
   photo: string;
   images: string[];
   includedItems: string[];
@@ -44,6 +46,7 @@ function toDate(value: unknown) {
 function mapProduct(snapshot: QueryDocumentSnapshot<DocumentData>): Product {
   const data = snapshot.data();
   const photo = data.photo || data.images?.[0] || '';
+  const classification = normalizeProductClassification(data.category, data.subcategory);
 
   return {
     id: snapshot.id,
@@ -52,7 +55,8 @@ function mapProduct(snapshot: QueryDocumentSnapshot<DocumentData>): Product {
     description: data.description || '',
     longDescription: data.longDescription || data.description || '',
     price: Number(data.price || 0),
-    category: data.category || 'personalizados',
+    category: classification.category,
+    subcategory: classification.subcategory,
     tag: data.tag || (data.available === false ? 'Indisponivel' : 'Disponivel'),
     featured: Boolean(data.featured),
     rating: Number(data.rating || 5),
@@ -92,6 +96,7 @@ export async function createProduct(values: ProductFormValues) {
 
   await addDoc(collection(database, 'products'), {
     ...values,
+    subcategory: values.category === 'presentes' ? values.subcategory : null,
     photo: images[0],
     slug,
     longDescription: values.description,
@@ -112,6 +117,7 @@ export async function updateProduct(productId: string, values: ProductFormValues
 
   await updateDoc(doc(database, 'products', productId), {
     ...values,
+    subcategory: values.category === 'presentes' ? values.subcategory : null,
     photo: images[0],
     slug,
     longDescription: values.description,

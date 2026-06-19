@@ -1,5 +1,6 @@
 import { CheckCircle2, Edit3, Images, Trash2, XCircle } from 'lucide-react';
 import { Button } from '../../../shared/components/ui/Button';
+import { getCategoryName, getSubcategoryName } from '../../../shared/config/categories';
 import { formatCurrency } from '../../../shared/services/whatsapp';
 import type { Product } from '../../../shared/types/product';
 
@@ -41,6 +42,16 @@ export function ProductCard({ product, onEdit, onDelete }: ProductCardProps) {
           </span>
         </div>
         <p className="mt-3 line-clamp-2 text-sm leading-6 text-coffee/72 dark:text-cream/78">{product.description}</p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          <span className="rounded-full bg-cream px-3 py-1 text-xs font-extrabold text-coffee dark:bg-[#1f130e] dark:text-cream">
+            {getCategoryName(product.category)}
+          </span>
+          {product.subcategory && (
+            <span className="rounded-full bg-blush px-3 py-1 text-xs font-extrabold text-coffee">
+              {getSubcategoryName(product.subcategory)}
+            </span>
+          )}
+        </div>
         <div className="mt-4 grid gap-1 text-xs font-semibold text-coffee/60 dark:text-cream/60">
           <span className="inline-flex items-center gap-1">
             <Images size={14} /> {images.length} foto(s)

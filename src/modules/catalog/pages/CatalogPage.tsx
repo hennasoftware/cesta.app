@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { ArrowDownAZ, ChevronLeft, ChevronRight, Gift, MoreHorizontal, SearchX, SlidersHorizontal, Sparkles } from 'lucide-react';
+import { ArrowDownAZ, ChevronLeft, ChevronRight, Gift, MoreHorizontal, SearchX, Sparkles } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { ProductCard } from '../../../shared/components/cards/ProductCard';
@@ -11,31 +11,27 @@ import { WhatsAppButton } from '../../../shared/components/WhatsAppButton';
 import { Loading } from '../../../shared/components/ui/Loading';
 import { Select, type SelectOption } from '../../../shared/components/ui/Select';
 import { SectionTitle } from '../../../shared/components/ui/SectionTitle';
+import {
+  giftSubcategories,
+  isProductSubcategory,
+  normalizeCategoryFilter,
+  normalizeProductClassification,
+  productCategories,
+} from '../../../shared/config/categories';
 import { useProducts } from '../../../shared/hooks/useProducts';
-import { categories } from '../../../shared/mocks/products';
-import type { ProductCategory } from '../../../shared/types/product';
+import type { ProductCategory, ProductSubcategory } from '../../../shared/types/product';
 
 type SortOption = 'featured' | 'price-asc' | 'price-desc' | 'name';
 type PaginationItem = number | 'ellipsis-start' | 'ellipsis-end';
 
 const PRODUCTS_PER_PAGE = 6;
 
-const categoryOptions: Array<SelectOption<ProductCategory | 'todos'>> = [
-  { value: 'todos', label: 'Todos' },
-  ...categories.map((categoryItem) => ({ value: categoryItem.id, label: categoryItem.name })),
-];
 const sortOptions: Array<SelectOption<SortOption>> = [
   { value: 'featured', label: 'Destaques' },
   { value: 'price-desc', label: 'Maior preco' },
   { value: 'price-asc', label: 'Menor preco' },
   { value: 'name', label: 'Nome' },
 ];
-const validCategoryIds = new Set(categories.map((category) => category.id));
-
-function getValidInitialCategory(value: string | null) {
-  return value && validCategoryIds.has(value as ProductCategory) ? (value as ProductCategory) : 'todos';
-}
-
 function getPaginationItems(currentPage: number, totalPages: number): PaginationItem[] {
   if (totalPages <= 5) return Array.from({ length: totalPages }, (_, index) => index + 1);
 
@@ -55,22 +51,58 @@ function getMobilePaginationItems(currentPage: number, totalPages: number): numb
 
 export function CatalogPage() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const initialCategory = getValidInitialCategory(searchParams.get('categoria'));
   const [query, setQuery] = useState('');
-  const [category, setCategory] = useState<ProductCategory | 'todos'>(initialCategory);
   const [sort, setSort] = useState<SortOption>('name');
   const [currentPage, setCurrentPage] = useState(1);
   const { products, loading, error } = useProducts({ fallbackToMocks: false });
+  const searchParamsKey = searchParams.toString();
+  const requestedCategory = searchParams.get('categoria');
+  const category = normalizeCategoryFilter(requestedCategory) ?? 'todos';
+  const subcategoryParam = searchParams.get('subcategoria');
+  const subcategory: ProductSubcategory | 'todas' =
+    category === 'presentes' && isProductSubcategory(subcategoryParam) ? subcategoryParam : 'todas';
 
-  const filteredProducts = useMemo(() => {
+  const productsMatchingSearch = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
-    const result = products.filter((product) => {
-      const matchesCategory = category === 'todos' || product.category === category;
-      const matchesSearch = [product.name, product.description, product.tag]
+
+    return products.filter((product) =>
+      [product.name, product.description, product.tag]
         .join(' ')
         .toLowerCase()
-        .includes(normalizedQuery);
-      return matchesCategory && matchesSearch;
+        .includes(normalizedQuery),
+    );
+  }, [products, query]);
+
+  const categoryCounts = useMemo(
+    () =>
+      Object.fromEntries(
+        productCategories.map((categoryItem) => [
+          categoryItem.id,
+          productsMatchingSearch.filter((product) => product.category === categoryItem.id).length,
+        ]),
+      ) as Record<ProductCategory, number>,
+    [productsMatchingSearch],
+  );
+
+  const subcategoryCounts = useMemo(
+    () =>
+      Object.fromEntries(
+        giftSubcategories.map((subcategoryItem) => [
+          subcategoryItem.id,
+          productsMatchingSearch.filter(
+            (product) => product.category === 'presentes' && product.subcategory === subcategoryItem.id,
+          ).length,
+        ]),
+      ) as Record<ProductSubcategory, number>,
+    [productsMatchingSearch],
+  );
+
+  const filteredProducts = useMemo(() => {
+    const result = productsMatchingSearch.filter((product) => {
+      const matchesCategory = category === 'todos' || product.category === category;
+      const matchesSubcategory =
+        category !== 'presentes' || subcategory === 'todas' || product.subcategory === subcategory;
+      return matchesCategory && matchesSubcategory;
     });
 
     return [...result].sort((a, b) => {
@@ -79,7 +111,7 @@ export function CatalogPage() {
       if (sort === 'name') return a.name.localeCompare(b.name);
       return Number(b.featured) - Number(a.featured);
     });
-  }, [category, products, query, sort]);
+  }, [category, productsMatchingSearch, sort, subcategory]);
 
   const totalPages = Math.max(1, Math.ceil(filteredProducts.length / PRODUCTS_PER_PAGE));
   const firstProductIndex = (currentPage - 1) * PRODUCTS_PER_PAGE;
@@ -90,20 +122,66 @@ export function CatalogPage() {
   const mobilePaginationItems = useMemo(() => getMobilePaginationItems(currentPage, totalPages), [currentPage, totalPages]);
 
   useEffect(() => {
+    const nextParams = new URLSearchParams(searchParamsKey);
+    const rawCategory = nextParams.get('categoria');
+    const normalizedCategory = normalizeCategoryFilter(rawCategory);
+    let changed = false;
+
+    if (rawCategory && !normalizedCategory) {
+      nextParams.delete('categoria');
+      nextParams.delete('subcategoria');
+      changed = true;
+    } else if (rawCategory && normalizedCategory && rawCategory !== normalizedCategory) {
+      const legacyClassification = normalizeProductClassification(rawCategory);
+      nextParams.set('categoria', normalizedCategory);
+      if (!nextParams.has('subcategoria') && legacyClassification.subcategory) {
+        nextParams.set('subcategoria', legacyClassification.subcategory);
+      }
+      changed = true;
+    }
+
+    const canonicalCategory = normalizeCategoryFilter(nextParams.get('categoria'));
+    const rawSubcategory = nextParams.get('subcategoria');
+    if (rawSubcategory && (canonicalCategory !== 'presentes' || !isProductSubcategory(rawSubcategory))) {
+      nextParams.delete('subcategoria');
+      changed = true;
+    }
+
+    if (changed) {
+      setSearchParams(nextParams, { replace: true });
+    }
+  }, [searchParamsKey, setSearchParams]);
+
+  useEffect(() => {
     setCurrentPage(1);
-  }, [category, query, sort]);
+  }, [category, query, sort, subcategory]);
 
   useEffect(() => {
     setCurrentPage((page) => Math.min(page, totalPages));
   }, [totalPages]);
 
   function changeCategory(value: ProductCategory | 'todos') {
-    setCategory(value);
+    const nextParams = new URLSearchParams(searchParams);
     if (value === 'todos') {
-      setSearchParams({});
+      nextParams.delete('categoria');
+      nextParams.delete('subcategoria');
+      setSearchParams(nextParams);
       return;
     }
-    setSearchParams({ categoria: value });
+    nextParams.set('categoria', value);
+    nextParams.delete('subcategoria');
+    setSearchParams(nextParams);
+  }
+
+  function changeSubcategory(value: ProductSubcategory | 'todas') {
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.set('categoria', 'presentes');
+    if (value === 'todas') {
+      nextParams.delete('subcategoria');
+    } else {
+      nextParams.set('subcategoria', value);
+    }
+    setSearchParams(nextParams);
   }
 
   function changePage(page: number) {
@@ -137,16 +215,8 @@ export function CatalogPage() {
           </div>
         </div>
 
-        <div className="grid gap-4 border-t border-coffee/8 bg-cream/75 p-5 dark:border-white/14 dark:bg-[#1f130e] lg:grid-cols-[1fr_auto_auto]">
+        <div className="grid gap-4 border-t border-coffee/8 bg-cream/75 p-5 dark:border-white/14 dark:bg-[#1f130e] lg:grid-cols-[1fr_auto]">
           <SearchBar value={query} onChange={setQuery} />
-          <Select
-            value={category}
-            options={categoryOptions}
-            onChange={changeCategory}
-            ariaLabel="Filtrar por categoria"
-            icon={<SlidersHorizontal size={17} />}
-            className="bg-white/90"
-          />
           <Select
             value={sort}
             options={sortOptions}
@@ -155,6 +225,68 @@ export function CatalogPage() {
             icon={<ArrowDownAZ size={17} />}
             className="bg-white/90"
           />
+
+          <div className="flex flex-wrap gap-2 lg:col-span-2" aria-label="Filtros rápidos por categoria">
+            <button
+              type="button"
+              onClick={() => changeCategory('todos')}
+              aria-pressed={category === 'todos'}
+              className={`h-10 rounded-full border px-4 text-sm font-extrabold transition ${
+                category === 'todos'
+                  ? 'border-coffee bg-coffee text-cream shadow-sm dark:border-gold dark:bg-gold dark:text-espresso'
+                  : 'border-coffee/10 bg-white text-coffee/70 hover:border-caramel/40 hover:text-coffee dark:border-white/14 dark:bg-[#2a1a13] dark:text-cream/75'
+              }`}
+            >
+              Todas ({productsMatchingSearch.length})
+            </button>
+            {productCategories.map((categoryItem) => (
+              <button
+                key={categoryItem.id}
+                type="button"
+                onClick={() => changeCategory(categoryItem.id)}
+                aria-pressed={category === categoryItem.id}
+                className={`h-10 rounded-full border px-4 text-sm font-extrabold transition ${
+                  category === categoryItem.id
+                    ? 'border-coffee bg-coffee text-cream shadow-sm dark:border-gold dark:bg-gold dark:text-espresso'
+                    : 'border-coffee/10 bg-white text-coffee/70 hover:border-caramel/40 hover:text-coffee dark:border-white/14 dark:bg-[#2a1a13] dark:text-cream/75'
+                }`}
+              >
+                {categoryItem.shortName} ({categoryCounts[categoryItem.id]})
+              </button>
+            ))}
+          </div>
+
+          {category === 'presentes' && (
+            <div className="flex flex-wrap gap-2 border-t border-coffee/8 pt-4 dark:border-white/10 lg:col-span-2" aria-label="Filtros por subcategoria">
+              <button
+                type="button"
+                onClick={() => changeSubcategory('todas')}
+                aria-pressed={subcategory === 'todas'}
+                className={`h-9 rounded-full px-3.5 text-xs font-extrabold transition ${
+                  subcategory === 'todas'
+                    ? 'bg-caramel text-white shadow-sm'
+                    : 'bg-white text-coffee/68 ring-1 ring-coffee/10 hover:text-coffee dark:bg-[#2a1a13] dark:text-cream/72 dark:ring-white/14'
+                }`}
+              >
+                Todas ({categoryCounts.presentes})
+              </button>
+              {giftSubcategories.map((subcategoryItem) => (
+                <button
+                  key={subcategoryItem.id}
+                  type="button"
+                  onClick={() => changeSubcategory(subcategoryItem.id)}
+                  aria-pressed={subcategory === subcategoryItem.id}
+                  className={`h-9 rounded-full px-3.5 text-xs font-extrabold transition ${
+                    subcategory === subcategoryItem.id
+                      ? 'bg-caramel text-white shadow-sm'
+                      : 'bg-white text-coffee/68 ring-1 ring-coffee/10 hover:text-coffee dark:bg-[#2a1a13] dark:text-cream/72 dark:ring-white/14'
+                  }`}
+                >
+                  {subcategoryItem.name} ({subcategoryCounts[subcategoryItem.id]})
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 

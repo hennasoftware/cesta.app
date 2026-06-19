@@ -4,9 +4,9 @@ import { Button } from '../../../shared/components/ui/Button';
 import { Input } from '../../../shared/components/ui/Input';
 import { Select, type SelectOption } from '../../../shared/components/ui/Select';
 import { Textarea } from '../../../shared/components/ui/Textarea';
-import { categories } from '../../../shared/mocks/products';
+import { giftSubcategories, productCategories } from '../../../shared/config/categories';
 import { createProduct, imageFileToProductPhoto, updateProduct, type ProductFormValues } from '../../../shared/services/products';
-import type { Product, ProductCategory } from '../../../shared/types/product';
+import type { Product, ProductCategory, ProductSubcategory } from '../../../shared/types/product';
 
 type ProductFormProps = {
   product?: Product | null;
@@ -18,16 +18,22 @@ const initialValues: ProductFormValues = {
   name: '',
   description: '',
   price: 0,
-  category: 'personalizados',
+  category: 'cafe-da-manha',
+  subcategory: null,
   photo: '',
   images: [],
   includedItems: [''],
   available: true,
 };
 
-const categoryOptions: Array<SelectOption<ProductCategory>> = categories.map((category) => ({
+const categoryOptions: Array<SelectOption<ProductCategory>> = productCategories.map((category) => ({
   value: category.id,
   label: category.name,
+}));
+
+const subcategoryOptions: Array<SelectOption<ProductSubcategory>> = giftSubcategories.map((subcategory) => ({
+  value: subcategory.id,
+  label: subcategory.name,
 }));
 
 export function ProductForm({ product, onCancelEdit, onSaved }: ProductFormProps) {
@@ -50,6 +56,7 @@ export function ProductForm({ product, onCancelEdit, onSaved }: ProductFormProps
       description: product.description,
       price: product.price,
       category: product.category,
+      subcategory: product.subcategory ?? null,
       photo: images[0] || '',
       images,
       includedItems: product.includedItems.length ? product.includedItems : [''],
@@ -60,6 +67,14 @@ export function ProductForm({ product, onCancelEdit, onSaved }: ProductFormProps
 
   function updateField<Key extends keyof ProductFormValues>(key: Key, value: ProductFormValues[Key]) {
     setValues((current) => ({ ...current, [key]: value }));
+  }
+
+  function updateCategory(category: ProductCategory) {
+    setValues((current) => ({
+      ...current,
+      category,
+      subcategory: category === 'presentes' ? current.subcategory : null,
+    }));
   }
 
   function updateImages(images: string[]) {
@@ -140,6 +155,7 @@ export function ProductForm({ product, onCancelEdit, onSaved }: ProductFormProps
     if (!values.name.trim()) return 'Informe o nome do produto.';
     if (!values.description.trim()) return 'Informe a descricao do produto.';
     if (!values.category) return 'Selecione uma categoria.';
+    if (values.category === 'presentes' && !values.subcategory) return 'Selecione uma subcategoria.';
     if (!values.price || values.price <= 0) return 'Informe um preco valido.';
     if (!values.images.length) return 'Envie pelo menos uma foto do produto.';
     return '';
@@ -253,10 +269,24 @@ export function ProductForm({ product, onCancelEdit, onSaved }: ProductFormProps
             <Select
               value={values.category}
               options={categoryOptions}
-              onChange={(value) => updateField('category', value)}
+              onChange={updateCategory}
               ariaLabel="Categoria do produto"
+              preserveOrder
             />
           </div>
+          {values.category === 'presentes' && (
+            <div className="sm:col-span-2">
+              <span className="mb-2 block text-sm font-bold text-coffee dark:text-cream">Subcategoria</span>
+              <Select
+                value={values.subcategory}
+                options={subcategoryOptions}
+                onChange={(value) => updateField('subcategory', value)}
+                ariaLabel="Subcategoria do produto"
+                placeholder="Selecione"
+                preserveOrder
+              />
+            </div>
+          )}
         </div>
 
         <div>

@@ -7,13 +7,14 @@ export type SelectOption<Value extends string> = {
 };
 
 type SelectProps<Value extends string> = {
-  value: Value;
+  value: Value | null;
   options: Array<SelectOption<Value>>;
   onChange: (value: Value) => void;
   ariaLabel: string;
   placeholder?: string;
   icon?: ReactNode;
   className?: string;
+  preserveOrder?: boolean;
 };
 
 function sortOptions<Value extends string>(options: Array<SelectOption<Value>>) {
@@ -100,8 +101,9 @@ export function Select<Value extends string>({
   placeholder,
   icon,
   className = '',
+  preserveOrder = false,
 }: SelectProps<Value>) {
-  const sortedOptions = sortOptions(options);
+  const sortedOptions = preserveOrder ? options : sortOptions(options);
   const selectedOption = sortedOptions.find((option) => option.value === value) ?? null;
 
   function handleChange(option: SingleValue<SelectOption<Value>>) {

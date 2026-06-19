@@ -1,9 +1,11 @@
-export type ProductCategory =
-  | 'cafe'
+export type ProductCategory = 'cafe-da-manha' | 'vinho-e-frios' | 'presentes';
+
+export type ProductSubcategory =
   | 'romanticas'
-  | 'personalizados'
-  | 'corporativos'
-  | 'datas-especiais';
+  | 'aniversarios'
+  | 'maternidade'
+  | 'promocao-graduacao'
+  | 'tematicas';
 
 export type Product = {
   id: string;
@@ -13,6 +15,7 @@ export type Product = {
   longDescription: string;
   price: number;
   category: ProductCategory;
+  subcategory?: ProductSubcategory | null;
   tag: string;
   featured?: boolean;
   rating: number;

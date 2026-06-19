@@ -96,8 +96,28 @@ Exemplo:
 const PHONE_NUMBER = '5512999999999';
 ```
 
+## Categorias no Firestore
+
+Os documentos da coleção `products` usam a seguinte classificação:
+
+```ts
+category: 'cafe-da-manha' | 'vinho-e-frios' | 'presentes';
+subcategory:
+  | 'romanticas'
+  | 'aniversarios'
+  | 'maternidade'
+  | 'promocao-graduacao'
+  | 'tematicas'
+  | null;
+```
+
+`subcategory` deve ser `null` para café da manhã e vinho e frios. A aplicação mantém
+compatibilidade de leitura com os IDs antigos (`cafe`, `romanticas`, `personalizados`,
+`corporativos` e `datas-especiais`). Ao editar um produto legado no painel, o documento
+é salvo no formato novo, permitindo migração gradual sem interromper o catálogo.
+
 ## Observações
 
-- Os produtos e categorias estão mockados em `src/shared/mocks/products.ts`.
+- Os mocks de produtos permanecem em `src/shared/mocks/products.ts` como fallback de desenvolvimento.
 - As imagens atuais usam URLs externas para fins de demonstração.
 - Para produção, recomenda-se substituir por fotos reais otimizadas da Cesta.com.
