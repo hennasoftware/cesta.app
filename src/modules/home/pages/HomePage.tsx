@@ -35,6 +35,9 @@ const trustItems = [
   { icon: Sparkles, label: 'Produtos selecionados' },
 ];
 
+const heroButtonBase =
+  'w-full border text-base font-extrabold shadow-[0_12px_28px_rgba(32,17,13,0.22)] hover:-translate-y-0.5 sm:w-auto';
+
 export function HomePage() {
   const [isOrderGuideOpen, setIsOrderGuideOpen] = useState(false);
   const { products } = useProducts({ fallbackToMocks: false });
@@ -75,21 +78,31 @@ export function HomePage() {
               <ButtonLink
                 to="/catalogo"
                 size="lg"
-                className="border border-white bg-white text-espresso shadow-glow hover:bg-cream hover:text-espresso dark:border-white dark:bg-white dark:text-espresso dark:hover:bg-cream"
+                className={`${heroButtonBase} border-white bg-white text-espresso hover:border-gold hover:bg-gold hover:text-espresso dark:border-white dark:bg-white dark:text-espresso dark:hover:border-gold dark:hover:bg-gold dark:hover:text-espresso`}
               >
                 Ver Catálogo <ArrowRight size={18} />
               </ButtonLink>
-              <WhatsAppButton message={customOrderMessage()} size="lg">
+              <WhatsAppButton
+                message={customOrderMessage()}
+                size="lg"
+                className={`${heroButtonBase} border-transparent bg-[#1f8f4d] text-white hover:border-transparent hover:bg-[#187a40] dark:!border-transparent dark:!bg-[#1f8f4d] dark:!text-white dark:hover:!border-transparent dark:hover:!bg-[#187a40]`}
+              >
                 Fazer Pedido
               </WhatsAppButton>
-              <Button type="button" size="lg" variant="secondary" onClick={() => setIsOrderGuideOpen(true)}>
+              <Button
+                type="button"
+                size="lg"
+                variant="secondary"
+                className={`${heroButtonBase} border-white bg-white text-espresso hover:border-gold hover:bg-gold hover:text-espresso dark:border-white dark:bg-white dark:text-espresso dark:hover:border-gold dark:hover:bg-gold dark:hover:text-espresso`}
+                onClick={() => setIsOrderGuideOpen(true)}
+              >
                 Pedido guiado
               </Button>
             </div>
 
             <div className="mt-10 grid max-w-2xl gap-3 sm:grid-cols-3">
               {trustItems.map((item) => (
-                <div key={item.label} className="flex items-center gap-3 rounded-2xl border border-white/22 bg-white/10 p-4 shadow-sm backdrop-blur sm:bg-black/18">
+                <div key={item.label} className="flex items-center gap-3 rounded-2xl border border-white/30 bg-espresso/88 p-4 shadow-[0_10px_28px_rgba(32,17,13,0.30)] backdrop-blur-md">
                   <item.icon size={19} className="text-gold" />
                   <p className="text-sm font-bold text-white">{item.label}</p>
                 </div>
