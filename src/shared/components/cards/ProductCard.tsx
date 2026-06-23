@@ -69,6 +69,7 @@ function ProductCardComponent({ product }: ProductCardProps) {
 
         <WhatsAppButton
           message={productOrderMessage(product.name)}
+          product={{ name: product.name, price: product.price, url: `/produto/${product.slug}` }}
           size="md"
           className="mt-4 w-full bg-[#1f8f4d] text-white shadow-[0_10px_24px_rgba(31,143,77,0.22)] hover:bg-[#187a40] dark:bg-[#25d366] dark:text-espresso dark:hover:bg-[#31df73] sm:mt-5"
         >
