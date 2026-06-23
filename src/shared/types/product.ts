@@ -25,6 +25,7 @@ export type Product = {
   createdAt?: Date;
   updatedAt?: Date;
   includedItems: string[];
+  keywords?: string[];
 };
 
 export type Category = {

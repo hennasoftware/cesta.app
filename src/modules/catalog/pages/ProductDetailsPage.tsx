@@ -15,7 +15,7 @@ import {
   X,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { Link, Navigate, useParams } from 'react-router-dom';
+import { Link, Navigate, useLocation, useParams } from 'react-router-dom';
 import { ProductCard } from '../../../shared/components/cards/ProductCard';
 import { ProductShareButton } from '../../../shared/components/ProductShareButton';
 import { Seo } from '../../../shared/components/Seo';
@@ -53,6 +53,7 @@ const experienceBlocks = [
 
 export function ProductDetailsPage() {
   const { slug } = useParams();
+  const location = useLocation();
   const { product, relatedProducts, loading } = useProductDetails(slug);
   const [activeImage, setActiveImage] = useState(0);
   const [isImageViewerOpen, setIsImageViewerOpen] = useState(false);
@@ -105,6 +106,8 @@ export function ProductDetailsPage() {
   const categoryUrl = `/catalogo?categoria=${product.category}${
     product.subcategory ? `&subcategoria=${product.subcategory}` : ''
   }`;
+  const catalogReturnUrl =
+    typeof location.state?.catalogReturnUrl === 'string' ? location.state.catalogReturnUrl : '/catalogo';
   const orderMessage = productOrderMessage(product.name);
   const productUrl = `/produto/${product.slug}`;
   const productContact = {
@@ -188,7 +191,7 @@ export function ProductDetailsPage() {
 
       <div className="border-b border-coffee/8 bg-white/45 dark:border-[#f26922]/20 dark:bg-[#140b08]">
         <div className="mx-auto flex max-w-7xl items-center gap-2 overflow-x-auto px-4 py-3 text-xs font-bold text-coffee/60 sm:px-6 lg:px-8 dark:text-cream/60">
-          <Link to="/catalogo" className="inline-flex shrink-0 items-center gap-1.5 transition hover:text-caramel">
+          <Link to={catalogReturnUrl} className="inline-flex shrink-0 items-center gap-1.5 transition hover:text-caramel">
             <ArrowLeft size={14} /> Catálogo
           </Link>
           <ChevronRight size={13} className="shrink-0 opacity-40" />
@@ -427,7 +430,7 @@ export function ProductDetailsPage() {
         />
         <div className="grid gap-6 md:grid-cols-3">
           {relatedProducts.map((item) => (
-            <ProductCard key={item.id} product={item} />
+            <ProductCard key={item.id} product={item} catalogReturnUrl={catalogReturnUrl} />
           ))}
         </div>
         </div>

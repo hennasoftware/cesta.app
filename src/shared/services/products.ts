@@ -45,6 +45,7 @@ export type ProductFormValues = {
   photo: string;
   images: string[];
   includedItems: string[];
+  keywords: string;
   available: boolean;
   featured: boolean;
   featuredOrder: number;
@@ -91,6 +92,7 @@ function mapProduct(snapshot: QueryDocumentSnapshot<DocumentData>): Product {
     updatedAt: toDate(data.updatedAt),
     images: data.images?.length ? data.images : [photo],
     includedItems: Array.isArray(data.includedItems) ? data.includedItems : [],
+    keywords: Array.isArray(data.keywords) ? data.keywords.filter((keyword): keyword is string => typeof keyword === 'string') : [],
   };
 }
 
@@ -270,6 +272,7 @@ export async function createProduct(values: ProductFormValues) {
     featuredOrder: values.featured ? Math.max(1, values.featuredOrder || 1) : 999,
     images,
     includedItems: values.includedItems.filter(Boolean),
+    keywords: normalizeKeywords(values.keywords),
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   });
@@ -291,6 +294,7 @@ export async function updateProduct(productId: string, values: ProductFormValues
     featuredOrder: values.featured ? Math.max(1, values.featuredOrder || 1) : 999,
     images,
     includedItems: values.includedItems.filter(Boolean),
+    keywords: normalizeKeywords(values.keywords),
     updatedAt: serverTimestamp(),
   });
 }
@@ -311,6 +315,13 @@ export async function deleteProduct(productId: string) {
 function normalizeImages(values: ProductFormValues) {
   const images = values.images.length ? values.images : values.photo ? [values.photo] : [];
   return images.filter(Boolean).slice(0, 4);
+}
+
+function normalizeKeywords(value: string) {
+  return value
+    .split(/[,;\n]/)
+    .map((keyword) => keyword.trim())
+    .filter(Boolean);
 }
 
 export async function imageFileToProductPhoto(file: File, maxDataUrlLength = 220_000) {

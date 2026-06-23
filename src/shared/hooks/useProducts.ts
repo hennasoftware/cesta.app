@@ -13,6 +13,7 @@ import {
   type CatalogFilters,
 } from '../services/products';
 import type { Product } from '../types/product';
+import { indexProducts, normalizeSearchText, searchIndexedProducts, type IndexedProduct } from '../services/productSearch';
 
 type AsyncProductsState = {
   products: Product[];
@@ -96,9 +97,11 @@ export function useCatalogProducts(options: UseCatalogProductsOptions) {
   const [error, setError] = useState<string | null>(null);
   const pageCache = useRef(new Map<number, { products: Product[]; lastDocument: QueryDocumentSnapshot<DocumentData> | null }>());
   const countCache = useRef(new Map<string, number>());
+  const searchIndexCache = useRef(new Map<string, IndexedProduct[]>());
   const filterKey = `${options.category}|${options.subcategory}|${options.sort}|${options.pageSize}`;
+  const searchFilterKey = `${options.category}|${options.subcategory}`;
   const previousFilterKey = useRef(filterKey);
-  const normalizedSearch = options.search.trim().toLowerCase();
+  const normalizedSearch = normalizeSearchText(options.search);
 
   useEffect(() => {
     if (previousFilterKey.current !== filterKey) {
@@ -122,13 +125,13 @@ export function useCatalogProducts(options: UseCatalogProductsOptions) {
 
     async function load() {
       if (normalizedSearch) {
-        const searchableProducts = await searchCatalogProducts(options);
-        const filtered = searchableProducts.filter((product) =>
-          [product.name, product.description, product.tag, ...product.includedItems]
-            .join(' ')
-            .toLowerCase()
-            .includes(normalizedSearch),
-        );
+        let indexedProducts = searchIndexCache.current.get(searchFilterKey);
+        if (!indexedProducts) {
+          const searchableProducts = await searchCatalogProducts(options);
+          indexedProducts = indexProducts(searchableProducts);
+          searchIndexCache.current.set(searchFilterKey, indexedProducts);
+        }
+        const filtered = searchIndexedProducts(indexedProducts, normalizedSearch);
         const sorted = sortProducts(filtered, options.sort);
         const start = (options.page - 1) * options.pageSize;
         if (!active) return;
@@ -203,6 +206,7 @@ export function useCatalogProducts(options: UseCatalogProductsOptions) {
     options.pageSize,
     options.sort,
     options.subcategory,
+    searchFilterKey,
   ]);
 
   return { products, totalProducts, loading, error };

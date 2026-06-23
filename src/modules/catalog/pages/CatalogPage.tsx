@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
-import { ArrowDownAZ, ChevronLeft, ChevronRight, Gift, MoreHorizontal, SearchX, Sparkles } from 'lucide-react';
-import { useDeferredValue, useEffect, useMemo, useState } from 'react';
+import { ArrowDownAZ, ChevronLeft, ChevronRight, Gift, MoreHorizontal, SearchX } from 'lucide-react';
+import { useDeferredValue, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { ProductCard } from '../../../shared/components/cards/ProductCard';
 import { SearchBar } from '../../../shared/components/SearchBar';
@@ -13,6 +13,8 @@ import { Select, type SelectOption } from '../../../shared/components/ui/Select'
 import { SectionTitle } from '../../../shared/components/ui/SectionTitle';
 import {
   giftSubcategories,
+  getCategoryName,
+  getSubcategoryName,
   isProductSubcategory,
   normalizeCategoryFilter,
   normalizeProductClassification,
@@ -20,6 +22,7 @@ import {
 } from '../../../shared/config/categories';
 import { useCatalogProducts } from '../../../shared/hooks/useProducts';
 import type { CatalogSort } from '../../../shared/services/products';
+import { catalogSuggestionMessage } from '../../../shared/services/whatsapp';
 import type { ProductCategory, ProductSubcategory } from '../../../shared/types/product';
 
 type PaginationItem = number | 'ellipsis-start' | 'ellipsis-end';
@@ -32,6 +35,34 @@ const sortOptions: Array<SelectOption<CatalogSort>> = [
   { value: 'price-asc', label: 'Menor preco' },
   { value: 'name', label: 'Nome' },
 ];
+
+const sortParamByValue: Record<CatalogSort, string> = {
+  featured: 'destaques',
+  'price-desc': 'preco-desc',
+  'price-asc': 'preco-asc',
+  name: 'nome',
+};
+
+const sortValueByParam: Record<string, CatalogSort> = {
+  destaques: 'featured',
+  featured: 'featured',
+  'preco-desc': 'price-desc',
+  'price-desc': 'price-desc',
+  'preco-asc': 'price-asc',
+  'price-asc': 'price-asc',
+  nome: 'name',
+  name: 'name',
+};
+
+function getSortFromParam(value: string | null): CatalogSort {
+  return value ? sortValueByParam[value] ?? 'name' : 'name';
+}
+
+function getPageFromParam(value: string | null) {
+  const page = Number(value);
+  return Number.isInteger(page) && page > 0 ? page : 1;
+}
+
 function getPaginationItems(currentPage: number, totalPages: number): PaginationItem[] {
   if (totalPages <= 5) return Array.from({ length: totalPages }, (_, index) => index + 1);
 
@@ -51,11 +82,11 @@ function getMobilePaginationItems(currentPage: number, totalPages: number): numb
 
 export function CatalogPage() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [query, setQuery] = useState('');
-  const deferredQuery = useDeferredValue(query);
-  const [sort, setSort] = useState<CatalogSort>('name');
-  const [currentPage, setCurrentPage] = useState(1);
   const searchParamsKey = searchParams.toString();
+  const query = searchParams.get('busca') ?? '';
+  const deferredQuery = useDeferredValue(query);
+  const sort = getSortFromParam(searchParams.get('ordem'));
+  const currentPage = getPageFromParam(searchParams.get('page'));
   const requestedCategory = searchParams.get('categoria');
   const category = normalizeCategoryFilter(requestedCategory) ?? 'todos';
   const subcategoryParam = searchParams.get('subcategoria');
@@ -76,6 +107,11 @@ export function CatalogPage() {
   const visibleEnd = Math.min(firstProductIndex + paginatedProducts.length, totalProducts);
   const paginationItems = useMemo(() => getPaginationItems(currentPage, totalPages), [currentPage, totalPages]);
   const mobilePaginationItems = useMemo(() => getMobilePaginationItems(currentPage, totalPages), [currentPage, totalPages]);
+  const suggestionMessage = catalogSuggestionMessage({
+    search: query || undefined,
+    category: category !== 'todos' ? getCategoryName(category, true) : undefined,
+    subcategory: subcategory !== 'todas' ? getSubcategoryName(subcategory) ?? undefined : undefined,
+  });
 
   useEffect(() => {
     const nextParams = new URLSearchParams(searchParamsKey);
@@ -103,22 +139,51 @@ export function CatalogPage() {
       changed = true;
     }
 
+    const rawSearch = nextParams.get('busca');
+    if (rawSearch !== null && !rawSearch.trim()) {
+      nextParams.delete('busca');
+      changed = true;
+    }
+
+    const rawSort = nextParams.get('ordem');
+    const normalizedSort = getSortFromParam(rawSort);
+    if (rawSort && !sortValueByParam[rawSort]) {
+      nextParams.delete('ordem');
+      changed = true;
+    } else if (rawSort && normalizedSort === 'name') {
+      nextParams.delete('ordem');
+      changed = true;
+    } else if (rawSort && rawSort !== sortParamByValue[normalizedSort]) {
+      nextParams.set('ordem', sortParamByValue[normalizedSort]);
+      changed = true;
+    }
+
+    const rawPage = nextParams.get('page');
+    const normalizedPage = getPageFromParam(rawPage);
+    if (rawPage && (normalizedPage === 1 || rawPage !== String(normalizedPage))) {
+      nextParams.delete('page');
+      changed = true;
+    }
+
     if (changed) {
       setSearchParams(nextParams, { replace: true });
     }
   }, [searchParamsKey, setSearchParams]);
 
   useEffect(() => {
-    setCurrentPage(1);
-  }, [category, query, sort, subcategory]);
-
-  useEffect(() => {
-    setCurrentPage((page) => Math.min(page, totalPages));
-  }, [totalPages]);
+    if (loading || currentPage <= totalPages) return;
+    const nextParams = new URLSearchParams(searchParams);
+    if (totalPages > 1) {
+      nextParams.set('page', String(totalPages));
+    } else {
+      nextParams.delete('page');
+    }
+    setSearchParams(nextParams, { replace: true });
+  }, [currentPage, loading, searchParams, setSearchParams, totalPages]);
 
   function changeCategory(value: ProductCategory | 'todos') {
-    setCurrentPage(1);
     const nextParams = new URLSearchParams(searchParams);
+    nextParams.delete('page');
     if (value === 'todos') {
       nextParams.delete('categoria');
       nextParams.delete('subcategoria');
@@ -131,8 +196,8 @@ export function CatalogPage() {
   }
 
   function changeSubcategory(value: ProductSubcategory | 'todas') {
-    setCurrentPage(1);
     const nextParams = new URLSearchParams(searchParams);
+    nextParams.delete('page');
     nextParams.set('categoria', 'presentes');
     if (value === 'todas') {
       nextParams.delete('subcategoria');
@@ -144,7 +209,18 @@ export function CatalogPage() {
 
   function changePage(page: number) {
     const nextPage = Math.min(Math.max(page, 1), totalPages);
-    setCurrentPage(nextPage);
+    const nextParams = new URLSearchParams(searchParams);
+    if (nextPage === 1) {
+      nextParams.delete('page');
+    } else {
+      nextParams.set('page', String(nextPage));
+    }
+    setSearchParams(nextParams);
+    document.getElementById('catalog-results')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function clearFilters() {
+    setSearchParams({});
     document.getElementById('catalog-results')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
@@ -177,16 +253,28 @@ export function CatalogPage() {
           <SearchBar
             value={query}
             onChange={(value) => {
-              setQuery(value);
-              setCurrentPage(1);
+              const nextParams = new URLSearchParams(searchParams);
+              if (value) {
+                nextParams.set('busca', value);
+              } else {
+                nextParams.delete('busca');
+              }
+              nextParams.delete('page');
+              setSearchParams(nextParams, { replace: true });
             }}
           />
           <Select
             value={sort}
             options={sortOptions}
             onChange={(value) => {
-              setSort(value);
-              setCurrentPage(1);
+              const nextParams = new URLSearchParams(searchParams);
+              if (value === 'name') {
+                nextParams.delete('ordem');
+              } else {
+                nextParams.set('ordem', sortParamByValue[value]);
+              }
+              nextParams.delete('page');
+              setSearchParams(nextParams);
             }}
             ariaLabel="Ordenar produtos"
             icon={<ArrowDownAZ size={17} />}
@@ -288,7 +376,11 @@ export function CatalogPage() {
         <>
           <div className="mt-3 grid items-stretch gap-4 sm:mt-6 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
             {paginatedProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
+              <ProductCard
+                key={product.id}
+                product={product}
+                catalogReturnUrl={`/catalogo${searchParamsKey ? `?${searchParamsKey}` : ''}`}
+              />
             ))}
           </div>
 
@@ -370,14 +462,25 @@ export function CatalogPage() {
           </nav>
         </>
       ) : (
-        <div className="mt-8 rounded-[2.5rem] border border-coffee/8 bg-white p-10 text-center shadow-sm dark:border-white/14 dark:bg-[#24150f]">
-          <SearchX className="mx-auto text-caramel" size={36} />
-          <h2 className="mt-4 text-2xl font-extrabold text-coffee dark:text-cream">Nenhum presente encontrado</h2>
+        <div className="mt-8 rounded-[2.5rem] border border-coffee/8 bg-white px-5 py-10 text-center shadow-sm dark:border-white/14 dark:bg-[#24150f] sm:px-10 sm:py-12">
+          <span className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-pistachio text-caramel dark:bg-[#123b39] dark:text-[#64e3dd]">
+            <SearchX size={30} />
+          </span>
+          <h2 className="mt-5 text-2xl font-extrabold text-coffee dark:text-cream">Nenhuma cesta encontrada</h2>
           <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-coffee/72 dark:text-cream/78">
-            Ajuste a busca ou fale pelo WhatsApp para criar uma cesta personalizada para essa ocasião.
+            Não encontramos produtos para os filtros selecionados.
           </p>
-          <div className="mt-5 inline-flex items-center gap-2 rounded-full bg-pistachio px-4 py-2 text-sm font-bold text-coffee">
-            <Sparkles size={16} /> Atendimento monta uma sugestão para você
+          <div className="mx-auto mt-7 grid max-w-lg gap-3 sm:grid-cols-2">
+            <Button type="button" variant="secondary" size="lg" className="w-full" onClick={clearFilters}>
+              Limpar filtros
+            </Button>
+            <WhatsAppButton
+              message={suggestionMessage}
+              size="lg"
+              className="w-full bg-[#1f8f4d] font-extrabold text-white shadow-[0_12px_28px_rgba(31,143,77,0.24)] hover:bg-[#187a40] dark:bg-[#25d366] dark:text-espresso dark:hover:bg-[#31df73]"
+            >
+              Pedir uma sugestão
+            </WhatsAppButton>
           </div>
         </div>
       )}

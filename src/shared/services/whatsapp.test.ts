@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { brand } from '../config/brand';
 import {
   buildWhatsAppUrl,
+  catalogSuggestionMessage,
   customOrderMessage,
   formatCurrency,
   productOrderMessage,
@@ -24,6 +25,27 @@ describe('whatsapp service', () => {
 
   it('formats currency in pt-BR', () => {
     expect(formatCurrency(129.9)).toContain('129,90');
+  });
+
+  it('creates a catalog suggestion message with active filters', () => {
+    const message = catalogSuggestionMessage({
+      search: 'Ferrero Rocher',
+      category: 'Presentes',
+      subcategory: 'Românticas',
+    });
+
+    expect(message).toContain('Busca: Ferrero Rocher');
+    expect(message).toContain('Categoria: Presentes');
+    expect(message).toContain('Subcategoria: Românticas');
+    expect(message).toContain('Poderiam me indicar uma opção?');
+  });
+
+  it('omits inactive filters from the catalog suggestion message', () => {
+    const message = catalogSuggestionMessage();
+
+    expect(message).not.toContain('Busca:');
+    expect(message).not.toContain('Categoria:');
+    expect(message).not.toContain('Subcategoria:');
   });
 
   it('creates a qualified product message with catalog and delivery data', () => {

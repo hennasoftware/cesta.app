@@ -75,6 +75,27 @@ export function customOrderMessage() {
   ].join('\n');
 }
 
+type CatalogSuggestionContext = {
+  search?: string;
+  category?: string;
+  subcategory?: string;
+};
+
+export function catalogSuggestionMessage({ search, category, subcategory }: CatalogSuggestionContext = {}) {
+  const context = [
+    search?.trim() ? `Busca: ${search.trim()}` : null,
+    category ? `Categoria: ${category}` : null,
+    subcategory ? `Subcategoria: ${subcategory}` : null,
+  ].filter((line): line is string => line !== null);
+
+  return [
+    `Olá, ${brand.name}! Não encontrei uma cesta com as características que procuro no catálogo.`,
+    ...(context.length ? ['', ...context] : []),
+    '',
+    'Poderiam me indicar uma opção?',
+  ].join('\n');
+}
+
 export function formatCurrency(value: number) {
   return new Intl.NumberFormat('pt-BR', {
     style: 'currency',

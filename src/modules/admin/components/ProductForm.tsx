@@ -24,6 +24,7 @@ const initialValues: ProductFormValues = {
   photo: '',
   images: [],
   includedItems: [],
+  keywords: '',
   available: true,
   featured: false,
   featuredOrder: 1,
@@ -79,6 +80,7 @@ function snapshotsMatch(current: FormSnapshot, baseline: FormSnapshot) {
     current.values.featured === baseline.values.featured &&
     current.values.featuredOrder === baseline.values.featuredOrder &&
     current.values.tag === baseline.values.tag &&
+    current.values.keywords === baseline.values.keywords &&
     current.includedItemsText === baseline.includedItemsText &&
     current.values.images.length === baseline.values.images.length &&
     current.values.images.every((image, index) => image === baseline.values.images[index])
@@ -121,6 +123,7 @@ export function ProductForm({ product, onCancelEdit, onSaved, onDirtyChange }: P
       photo: images[0] || '',
       images,
       includedItems: product.includedItems,
+      keywords: product.keywords?.join(', ') ?? '',
       available: product.available !== false,
       featured: Boolean(product.featured),
       featuredOrder: product.featuredOrder ?? 1,
@@ -346,6 +349,18 @@ export function ProductForm({ product, onCancelEdit, onSaved, onDirtyChange }: P
           />
           <p className="mt-2 text-xs font-semibold leading-5 text-coffee/60 dark:text-cream/60">
             Use uma linha para cada item. Marcadores como hífen, bolinha ou numeração são removidos automaticamente ao salvar.
+          </p>
+        </div>
+
+        <div>
+          <span className="mb-2 block text-sm font-bold text-coffee dark:text-cream">Palavras-chave para busca</span>
+          <Input
+            value={values.keywords}
+            onChange={(event) => updateField('keywords', event.target.value)}
+            placeholder="Ex: dia das mães, maternidade, Ferrero Rocher"
+          />
+          <p className="mt-2 text-xs font-semibold leading-5 text-coffee/60 dark:text-cream/60">
+            Separe termos adicionais por vírgula. Eles ajudam na busca e não aparecem na página do produto.
           </p>
         </div>
 
