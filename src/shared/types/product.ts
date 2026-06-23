@@ -19,7 +19,6 @@ export type Product = {
   tag: string;
   featured?: boolean;
   featuredOrder?: number;
-  rating?: number;
   images: string[];
   photo?: string;
   available?: boolean;

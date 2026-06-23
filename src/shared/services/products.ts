@@ -85,7 +85,6 @@ function mapProduct(snapshot: QueryDocumentSnapshot<DocumentData>): Product {
     tag: data.tag || '',
     featured: Boolean(data.featured),
     featuredOrder: Number(data.featuredOrder || 999),
-    rating: data.rating ? Number(data.rating) : undefined,
     photo,
     available: data.available !== false,
     createdAt: toDate(data.createdAt),

@@ -9,7 +9,6 @@ import { SectionTitle } from '../../../shared/components/ui/SectionTitle';
 import { FeaturedProductsSkeleton } from '../../../shared/components/ui/Skeletons';
 import { WhatsAppButton } from '../../../shared/components/WhatsAppButton';
 import { useFeaturedProducts } from '../../../shared/hooks/useProducts';
-import { testimonials } from '../../../shared/mocks/products';
 import { customOrderMessage } from '../../../shared/services/whatsapp';
 import { brand } from '../../../shared/config/brand';
 import { OrderGuideModal } from '../components/OrderGuideModal';
@@ -198,20 +197,6 @@ export function HomePage() {
         )}
       </section>
 
-      <section className="bg-espresso py-16 text-cream">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <SectionTitle eyebrow="Depoimentos" title="Quem recebe sente o cuidado" inverted />
-          <div className="grid gap-5 md:grid-cols-3">
-            {testimonials.map((testimonial) => (
-              <div key={testimonial.name} className="rounded-[2rem] border border-white/12 bg-white/10 p-6 shadow-glow">
-                <p className="text-2xl text-gold">{'★'.repeat(testimonial.rating)}</p>
-                <p className="mt-5 text-lg leading-8 text-cream/88">"{testimonial.text}"</p>
-                <p className="mt-5 font-bold text-gold">{testimonial.name}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
     </motion.div>
   );
 }

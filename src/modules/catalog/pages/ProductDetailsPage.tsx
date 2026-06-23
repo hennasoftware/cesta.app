@@ -11,13 +11,13 @@ import {
   PackageCheck,
   ShieldCheck,
   Sparkles,
-  Star,
   Truck,
   X,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link, Navigate, useParams } from 'react-router-dom';
 import { ProductCard } from '../../../shared/components/cards/ProductCard';
+import { ProductShareButton } from '../../../shared/components/ProductShareButton';
 import { Seo } from '../../../shared/components/Seo';
 import { WhatsAppButton } from '../../../shared/components/WhatsAppButton';
 import { Badge } from '../../../shared/components/ui/Badge';
@@ -26,7 +26,6 @@ import { ProductDetailsSkeleton } from '../../../shared/components/ui/Skeletons'
 import { SectionTitle } from '../../../shared/components/ui/SectionTitle';
 import { getCategoryName, getSubcategoryName } from '../../../shared/config/categories';
 import { useProductDetails } from '../../../shared/hooks/useProducts';
-import { testimonials } from '../../../shared/mocks/products';
 import { formatCurrency, productOrderMessage } from '../../../shared/services/whatsapp';
 
 const experienceBlocks = [
@@ -107,14 +106,15 @@ export function ProductDetailsPage() {
     product.subcategory ? `&subcategoria=${product.subcategory}` : ''
   }`;
   const orderMessage = productOrderMessage(product.name);
+  const productUrl = `/produto/${product.slug}`;
   const productContact = {
     name: product.name,
     price: product.price,
-    url: `/produto/${product.slug}`,
+    url: productUrl,
   };
   const availabilityLabel = product.available === false ? 'Consulte a disponibilidade' : 'Disponível';
   const whatsappButtonClass =
-    'min-h-14 w-full bg-[#1f8f4d] text-base font-extrabold text-white shadow-[0_14px_30px_rgba(31,143,77,0.24)] hover:bg-[#187a40] dark:bg-[#25d366] dark:text-espresso dark:hover:bg-[#31df73]';
+    'min-h-14 bg-[#1f8f4d] text-base font-extrabold text-white shadow-[0_14px_30px_rgba(31,143,77,0.24)] hover:bg-[#187a40] dark:bg-[#25d366] dark:text-espresso dark:hover:bg-[#31df73]';
 
   function showPreviousImage() {
     setActiveImage((current) => (current - 1 + images.length) % images.length);
@@ -126,7 +126,12 @@ export function ProductDetailsPage() {
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-      <Seo title={`${product.name} | Cesta.com`} description={product.longDescription || product.description} />
+      <Seo
+        title={`${product.name} | Cesta.com`}
+        description={product.description}
+        image={images[0]}
+        url={productUrl}
+      />
 
       {isImageViewerOpen && (
         <div
@@ -244,6 +249,36 @@ export function ProductDetailsPage() {
               ))}
             </div>
           )}
+
+          {(product.includedItems.length > 0 || product.longDescription) && (
+            <div className="mt-8 hidden border-y border-coffee/10 py-8 dark:border-[#f26922]/18 lg:block">
+              {product.includedItems.length > 0 && (
+                <div>
+                  <p className="text-xs font-extrabold uppercase tracking-[0.16em] text-caramel dark:text-[#ff9b4a]">Itens inclusos</p>
+                  <div className="mt-3 grid gap-x-6 xl:grid-cols-2">
+                    {product.includedItems.map((item, index) => (
+                      <div
+                        key={`${item}-${index}`}
+                        className="flex min-h-11 items-center gap-3 border-b border-coffee/8 py-2 text-sm font-bold text-coffee/76 dark:border-[#f26922]/14 dark:text-[#f4d8c8]"
+                      >
+                        <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-pistachio text-sage dark:bg-[#123b39] dark:text-[#64e3dd]">
+                          <Check size={14} strokeWidth={3} />
+                        </span>
+                        {item}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {product.longDescription && (
+                <div className={product.includedItems.length > 0 ? 'mt-8' : undefined}>
+                  <p className="text-xs font-extrabold uppercase tracking-[0.16em] text-caramel dark:text-[#ff9b4a]">Descrição e observações</p>
+                  <p className="mt-3 whitespace-pre-line text-base leading-7 text-coffee/72 dark:text-[#f4d8c8]">{product.longDescription}</p>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="lg:sticky lg:top-24 lg:self-start">
@@ -273,9 +308,16 @@ export function ProductDetailsPage() {
               </span>
             </div>
 
-            <WhatsAppButton message={orderMessage} product={productContact} size="lg" className={`mt-5 ${whatsappButtonClass}`}>
-              Pedir pelo WhatsApp
-            </WhatsAppButton>
+            <div className="mt-5 flex items-stretch gap-3">
+              <WhatsAppButton message={orderMessage} product={productContact} size="lg" className={`min-w-0 flex-1 ${whatsappButtonClass}`}>
+                Pedir pelo WhatsApp
+              </WhatsAppButton>
+              <ProductShareButton
+                name={product.name}
+                description={product.description}
+                url={productUrl}
+              />
+            </div>
 
             <div className="lg:hidden">
               {product.includedItems.length > 0 && (
@@ -323,44 +365,12 @@ export function ProductDetailsPage() {
               ))}
             </div>
 
-            <WhatsAppButton message={orderMessage} product={productContact} size="lg" className={`mt-6 lg:hidden ${whatsappButtonClass}`}>
+            <WhatsAppButton message={orderMessage} product={productContact} size="lg" className={`mt-6 w-full lg:hidden ${whatsappButtonClass}`}>
               Pedir pelo WhatsApp
             </WhatsAppButton>
           </div>
         </div>
       </section>
-
-      {(product.includedItems.length > 0 || product.longDescription) && (
-        <section className="mx-auto hidden max-w-7xl px-8 pb-14 lg:block">
-          <div className="grid gap-10 border-y border-coffee/10 py-8 dark:border-[#f26922]/18 lg:grid-cols-2">
-            {product.includedItems.length > 0 && (
-              <div className={product.longDescription ? undefined : 'lg:col-span-2'}>
-                <p className="text-xs font-extrabold uppercase tracking-[0.16em] text-caramel dark:text-[#ff9b4a]">Itens inclusos</p>
-                <div className="mt-3 grid gap-x-6 xl:grid-cols-2">
-                  {product.includedItems.map((item, index) => (
-                    <div
-                      key={`${item}-${index}`}
-                      className="flex min-h-11 items-center gap-3 border-b border-coffee/8 py-2 text-sm font-bold text-coffee/76 dark:border-[#f26922]/14 dark:text-[#f4d8c8]"
-                    >
-                      <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-pistachio text-sage dark:bg-[#123b39] dark:text-[#64e3dd]">
-                        <Check size={14} strokeWidth={3} />
-                      </span>
-                      {item}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {product.longDescription && (
-              <div className={product.includedItems.length > 0 ? undefined : 'lg:col-span-2'}>
-                <p className="text-xs font-extrabold uppercase tracking-[0.16em] text-caramel dark:text-[#ff9b4a]">Descrição e observações</p>
-                <p className="mt-3 whitespace-pre-line text-base leading-7 text-coffee/72 dark:text-[#f4d8c8]">{product.longDescription}</p>
-              </div>
-            )}
-          </div>
-        </section>
-      )}
 
       <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6 sm:py-16 lg:px-8">
         <SectionTitle eyebrow="Experiência" title="Tudo pensado para uma entrega marcante" />
@@ -401,22 +411,6 @@ export function ProductDetailsPage() {
               </div>
             ))}
           </div>
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6 sm:py-16 lg:px-8">
-        <SectionTitle eyebrow="Avaliações" title="Detalhes percebidos por quem presenteia" />
-        <div className="grid gap-4 md:grid-cols-3">
-          {testimonials.map((testimonial) => (
-            <div key={testimonial.name} className="border-l-2 border-gold bg-white/55 px-5 py-4 dark:border-[#ff9b4a] dark:bg-[#21120d]">
-              <div className="flex items-center gap-1 text-gold">
-                <Star size={15} fill="currentColor" />
-                <span className="text-sm font-extrabold">{testimonial.rating.toFixed(1)}</span>
-              </div>
-              <p className="mt-3 text-sm leading-7 text-coffee/74 dark:text-[#f4d8c8]">"{testimonial.text}"</p>
-              <p className="mt-3 text-sm font-extrabold text-coffee dark:text-white">{testimonial.name}</p>
-            </div>
-          ))}
         </div>
       </section>
 

@@ -10,7 +10,7 @@ O projeto entrega uma experiência responsiva com foco em conversão via WhatsAp
 
 ## Funcionalidades
 
-- Landing page com hero, categorias, diferenciais, passo a passo e depoimentos.
+- Landing page com hero, categorias, diferenciais e passo a passo.
 - Catálogo com busca, filtro por categoria e ordenação.
 - Página dinâmica de detalhes do produto.
 - Botões de pedido com mensagem pré-preenchida para WhatsApp.
